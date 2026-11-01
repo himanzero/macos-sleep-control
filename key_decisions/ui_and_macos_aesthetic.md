@@ -20,3 +20,12 @@
   - Call `NSApp.setActivationPolicy(.regular)` inside `StatusItemManager.showMainWindow()` so the Dock icon is shown while the dashboard window is open.
   - Implement `NSWindowDelegate.windowWillClose(_:)` on `StatusItemManager` to call `NSApp.setActivationPolicy(.accessory)` when the dashboard window closes, hiding the Dock icon while preserving background execution.
 - **Consequences**: Clean, uncluttered Dock when running in the background; full Dock & window presence when the dashboard is open; re-opening via Menu Bar Popover or double-clicking `SleepControl.app` in Finder seamlessly restores both the window and the Dock icon.
+
+## Decision 4: Screen-Boundary-Adaptive Resizable `StatusBarPanel` (`NSPanel`) over `NSPopover`
+- **Status**: Accepted (Supersedes `NSPopover`)
+- **Context**: When the status bar item was positioned close to the right edge of the screen, `NSPopover` with `NSHostingController` failed to clamp its expanded width to the screen's right boundary, causing the right portion of the popover to be clipped off-screen. Furthermore, `_NSPopoverWindow` locked the window frame so users could neither drag nor resize the popup.
+- **Decision Outcome**:
+  - Replace `NSPopover` with a custom `StatusBarPanel` (`NSPanel` subclass) styled with `NSVisualEffectView` (`.popover` material, `16pt` continuous corner radius) matching macOS Sonoma/Sequoia Control Center panels.
+  - Override `constrainFrameRect(_:to:)` and explicitly clamp `(origin.x, origin.y)` within `screen.visibleFrame.insetBy(dx: 10, dy: 10)` when opening below the `NSStatusBarButton`.
+  - Enable `.resizable` (`minWidth: 350, maxWidth: 540`) and `isMovableByWindowBackground = true` so the user can freely resize or reposition the panel if desired.
+  - Maintain transient auto-dismiss behavior when clicking outside or resigning key status.

@@ -25,16 +25,20 @@ struct MenuBarPopoverView: View {
                         .foregroundStyle(AppTheme.accentColor(isSleepDisabled: controller.isSleepDisabled))
                     Text(L("app.name"))
                         .font(.system(size: 13.5, weight: .bold, design: .rounded))
+                        .lineLimit(1)
+                        .fixedSize(horizontal: true, vertical: false)
                     Text(L("app.subtitle"))
                         .font(.system(size: 11, weight: .medium))
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
+                        .truncationMode(.tail)
                 }
 
-                Spacer()
+                Spacer(minLength: 4)
 
                 // Compact language switcher
                 LanguageSwitcherMenu(controller: controller, isCompact: true)
+                    .fixedSize()
 
                 // Passwordless authorization indicator badge
                 Button {
@@ -208,7 +212,7 @@ struct MenuBarPopoverView: View {
             .padding(.top, 2)
         }
         .padding(14)
-        .frame(width: 420)
+        .frame(minWidth: 350, idealWidth: 400, maxWidth: 540)
     }
 
     private func openMainDashboard() {
