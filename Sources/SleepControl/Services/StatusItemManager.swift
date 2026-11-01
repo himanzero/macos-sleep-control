@@ -4,7 +4,7 @@ import Combine
 
 /// Manages the native AppKit status bar item, frosted glass popover panel, and main dashboard window lifecycle
 @MainActor
-final class StatusItemManager: NSObject {
+final class StatusItemManager: NSObject, NSWindowDelegate {
     static let shared = StatusItemManager()
 
     private var statusItem: NSStatusItem?
@@ -61,7 +61,7 @@ final class StatusItemManager: NSObject {
         showMainWindow()
     }
 
-    /// Creates (if needed) and brings the main dashboard window to the front, even after being closed or minimized
+    /// Creates (if needed) and brings the main dashboard window to the front, restoring the Dock icon (.regular policy)
     func showMainWindow() {
         closePopover()
         NSApp.setActivationPolicy(.regular)
@@ -78,6 +78,7 @@ final class StatusItemManager: NSObject {
             window.isRestorable = false
             // Preserve the window instance when the user clicks the close ('x') button so it can be re-shown anytime
             window.isReleasedWhenClosed = false
+            window.delegate = self
             window.setContentSize(NSSize(width: 800, height: 690))
             window.minSize = NSSize(width: 760, height: 650)
             window.center()
@@ -90,6 +91,15 @@ final class StatusItemManager: NSObject {
         }
         window.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
+    }
+
+    // MARK: - NSWindowDelegate
+
+    func windowWillClose(_ notification: Notification) {
+        // Hide the Dock icon (.accessory policy) when the main dashboard window is closed while continuing background execution
+        DispatchQueue.main.async {
+            NSApp.setActivationPolicy(.accessory)
+        }
     }
 
     /// Updates status bar button icon and tooltip based on active sleep state
