@@ -1,0 +1,131 @@
+/* App & Window Titles */
+"app.name" = "SleepControl";
+"app.subtitle" = "Sleep Guard";
+"window.main.title" = "SleepControl Dashboard";
+"window.main.badge" = "macOS Power & Clamshell Guard";
+"window.main.subtitle" = "Visually manage pmset disablesleep with smart AC power automation and clamshell keep-awake";
+
+/* Menu Bar Label */
+"menubar.status.awake" = "Awake";
+"menubar.status.sleep" = "Sleep";
+
+/* Language Switcher */
+"lang.menu.title" = "Language";
+"lang.option.system" = "Follow System";
+"lang.setting.title" = "Interface Language";
+"lang.setting.subtitle" = "Defaults to system language (falls back to English)";
+
+/* Hero Card */
+"hero.status.disabled" = "System Sleep Disabled";
+"hero.status.enabled" = "System Sleep Allowed";
+"hero.desc.disabled" = "Mac stays awake even when idle or with the lid closed";
+"hero.desc.enabled" = "Follows standard macOS energy policy; sleeps when lid closes";
+"hero.button.allow_sleep" = "Allow Sleep";
+"hero.button.disable_sleep" = "Disable Sleep Now";
+
+/* Power Source */
+"power.source.ac" = "AC Power";
+"power.source.battery" = "Battery Power";
+"power.source.unknown" = "Unknown Power";
+"power.badge.ac" = "Plugged In";
+"power.badge.battery" = "On Battery";
+"power.badge.unknown" = "Power Unknown";
+"power.status.charging" = "Charging";
+"power.status.charged" = "Charged";
+"power.status.external" = "External Power";
+"power.summary.ac" = "%@ · %d%% (%@)";
+"power.summary.battery" = "%@ · %d%% Left";
+
+/* Smart Power Automation */
+"auto.card.title" = "Smart Power Automation";
+"auto.card.subtitle" = "Zero-polling hardware power events via IOKit";
+"auto.menubar.title" = "Auto Disable Sleep on AC";
+"auto.menubar.subtitle" = "Disable sleep when plugged in; restore on battery";
+"auto.rule.ac.title" = "AC Power Connected";
+"auto.rule.ac.action" = "Automatically run disablesleep 1 (Prevent sleep)";
+"auto.rule.battery.title" = "Switched to Battery Power";
+"auto.rule.battery.action" = "Automatically restore disablesleep 0 (Allow sleep)";
+"auto.rule.active_badge" = "Active";
+"auto.tip.passwordless" = "Enable Passwordless Auth for silent switching when plugging/unplugging";
+"auto.tip.configure_btn" = "Enable";
+
+/* Privilege & System Settings */
+"priv.card.title" = "Passwordless Auth & System";
+"priv.card.subtitle.enabled" = "Configured at /etc/sudoers.d/mac_sleep_control";
+"priv.card.subtitle.disabled" = "Avoid repeated password prompts on toggle or power change";
+"priv.badge.enabled" = "Passwordless Active";
+"priv.badge.disabled" = "Enable Passwordless";
+"priv.help.enabled" = "Passwordless sudoers configured for instant silent switching";
+"priv.help.disabled" = "Click to configure passwordless pmset authorization once";
+"priv.status.enabled" = "Instant Passwordless Channel Active";
+"priv.status.disabled" = "Passwordless Auth Not Configured";
+"priv.status.detail" = "Grants NOPASSWD exclusively to /usr/bin/pmset";
+"priv.btn.revoke" = "Revoke";
+"priv.btn.enable" = "Enable Passwordless Auth";
+"system.launch.title" = "Launch at Login";
+"system.launch.subtitle" = "Keep in menu bar and monitor power events automatically";
+
+/* Telemetry Card */
+"telemetry.card.title" = "Live pmset Telemetry";
+"telemetry.row.sleepdisabled" = "SleepDisabled (Global Guard)";
+"telemetry.val.disabled" = "1 (Sleep Disabled)";
+"telemetry.val.enabled" = "0 (Sleep Allowed)";
+"telemetry.row.powersource" = "Current Power Source";
+"telemetry.row.displaysleep" = "Display Sleep (displaysleep)";
+"telemetry.row.systemsleep" = "System Idle Sleep (sleep)";
+"telemetry.row.hibernatemode" = "Hibernate Mode (hibernatemode)";
+"telemetry.val.never" = "Never";
+"telemetry.val.minutes" = "%@ min";
+"telemetry.val.disabled_zero" = "Disabled (0)";
+"telemetry.val.mode" = "Mode %@";
+"telemetry.val.on" = "On";
+"telemetry.val.off" = "Off";
+
+/* Activity Log Card */
+"log.card.title" = "Recent Activity & Automation Log";
+"log.btn.clear" = "Clear";
+"log.empty" = "No activity recorded yet";
+
+/* Bottom & Header Actions */
+"action.open_dashboard" = "Dashboard";
+"action.refresh" = "Refresh";
+"action.sync" = "Sync Status";
+"action.quit" = "Quit";
+
+/* Log & Banner Messages */
+"msg.ready.title" = "System Status Ready";
+"msg.ready.detail" = "Status: %@ · %@";
+"msg.external_change.title" = "External Status Change Detected";
+"msg.external_change.detail" = "System sleep changed to: %@";
+"msg.toggle.disabled" = "System Sleep Disabled (disablesleep 1)";
+"msg.toggle.enabled" = "System Sleep Allowed (disablesleep 0)";
+"msg.toggle.source" = "Triggered by: %@";
+"msg.toggle.failed" = "Sleep Toggle Incomplete";
+"msg.reason.manual" = "Manual toggle";
+"msg.reason.hero_switch" = "Main switch toggle";
+"msg.reason.startup_sync" = "App launch · Power automation sync";
+"msg.reason.auto_enabled" = "Smart power automation enabled";
+"msg.reason.auth_done_sync" = "Passwordless auth configured · Power sync";
+"msg.power.ac_connected" = "AC Power Connected";
+"msg.power.battery_switched" = "Switched to Battery Power";
+"msg.auto.turned_on.title" = "Auto Disable Sleep on AC Enabled";
+"msg.auto.turned_on.detail" = "Plugged in -> disablesleep 1; On battery -> disablesleep 0";
+"msg.auto.turned_off.title" = "Auto Disable Sleep on AC Disabled";
+"msg.auto.turned_off.detail" = "Sleep state will remain unchanged when power changes";
+"msg.auth.canceled" = "Authorization canceled";
+"msg.auth.enabled.banner" = "Passwordless auth enabled! Toggles and power changes will now run silently.";
+"msg.auth.enabled.title" = "pmset Passwordless Auth Enabled";
+"msg.auth.enabled.detail" = "Configured /etc/sudoers.d/mac_sleep_control";
+"msg.auth.revoked.banner" = "Passwordless auth removed. Admin prompt will be used when toggling.";
+"msg.auth.revoked.title" = "Passwordless Auth Removed";
+"msg.auth.revoked.detail" = "Removed /etc/sudoers.d/mac_sleep_control";
+"msg.launch.on" = "Launch at Login Enabled";
+"msg.launch.off" = "Launch at Login Disabled";
+"msg.launch.detail" = "Managed via macOS SMAppService";
+"msg.launch.error" = "Failed to update Launch at Login: %@";
+
+/* Errors */
+"err.passwordless_not_configured" = "Passwordless auth is not enabled yet. Please click 'Enable Passwordless Auth' for silent automatic switching.";
+"err.user_canceled" = "Administrator authentication was canceled.";
+"err.invalid_username" = "Current macOS username (%@) format is not supported.";
+"err.exec_failed" = "Privileged command failed (exit code %d)";

@@ -1,0 +1,131 @@
+/* App & Window Titles */
+"app.name" = "SleepControl";
+"app.subtitle" = "休眠管家";
+"window.main.title" = "SleepControl 控制中心";
+"window.main.badge" = "macOS 电源与合盖防休眠卫士";
+"window.main.subtitle" = "可视化管控 pmset disablesleep，支持接入电源自动防休眠与合盖常亮运行";
+
+/* Menu Bar Label */
+"menubar.status.awake" = "常亮";
+"menubar.status.sleep" = "休眠";
+
+/* Language Switcher */
+"lang.menu.title" = "界面语言";
+"lang.option.system" = "跟随系统";
+"lang.setting.title" = "界面显示语言";
+"lang.setting.subtitle" = "默认跟随系统语言（若不支持则回退为英文）";
+
+/* Hero Card */
+"hero.status.disabled" = "已禁止系统休眠";
+"hero.status.enabled" = "正常允许系统休眠";
+"hero.desc.disabled" = "合上屏幕或静置时 Mac 将保持唤醒运行";
+"hero.desc.enabled" = "遵循 macOS 默认节能策略，合盖自动休眠";
+"hero.button.allow_sleep" = "恢复允许休眠";
+"hero.button.disable_sleep" = "立即禁止休眠";
+
+/* Power Source */
+"power.source.ac" = "交流电源 (AC)";
+"power.source.battery" = "电池供电";
+"power.source.unknown" = "未知电源";
+"power.badge.ac" = "已接入电源";
+"power.badge.battery" = "使用电池中";
+"power.badge.unknown" = "电源状态未知";
+"power.status.charging" = "充电中";
+"power.status.charged" = "已充满";
+"power.status.external" = "外接供电";
+"power.summary.ac" = "%@ · %d%% (%@)";
+"power.summary.battery" = "%@ · 剩余 %d%%";
+
+/* Smart Power Automation */
+"auto.card.title" = "智能电源联动";
+"auto.card.subtitle" = "IOKit 硬件级实时电源插拔监听";
+"auto.menubar.title" = "接入电源时自动 Disable Sleep";
+"auto.menubar.subtitle" = "插电自动禁止休眠，拔电自动恢复允许休眠";
+"auto.rule.ac.title" = "接入交流电源 (AC Power)";
+"auto.rule.ac.action" = "自动执行 disablesleep 1（禁止休眠）";
+"auto.rule.battery.title" = "拔掉电源切换电池 (Battery)";
+"auto.rule.battery.action" = "自动恢复 disablesleep 0（允许休眠）";
+"auto.rule.active_badge" = "当前生效";
+"auto.tip.passwordless" = "建议开启「免密授权」，插拔充电器时可静默无感自动切换";
+"auto.tip.configure_btn" = "一键配置";
+
+/* Privilege & System Settings */
+"priv.card.title" = "免密授权与系统设置";
+"priv.card.subtitle.enabled" = "已配置 /etc/sudoers.d/mac_sleep_control";
+"priv.card.subtitle.disabled" = "配置后插拔电源与点击开关无需重复输入密码";
+"priv.badge.enabled" = "免密已启用";
+"priv.badge.disabled" = "开启免密授权";
+"priv.help.enabled" = "已配置 sudoers 免密授权，开关与插拔电源均可静默秒级切换";
+"priv.help.disabled" = "点击一键配置 pmset 免密授权，避免后续每次弹出密码框";
+"priv.status.enabled" = "免密极速通道已激活";
+"priv.status.disabled" = "未开启免密静默授权";
+"priv.status.detail" = "仅针对 /usr/bin/pmset 授予 NOPASSWD 权限";
+"priv.btn.revoke" = "移除免密";
+"priv.btn.enable" = "一键开启免密授权";
+"system.launch.title" = "登录 macOS 时自动启动";
+"system.launch.subtitle" = "保持菜单栏常驻并自动监听电源状态";
+
+/* Telemetry Card */
+"telemetry.card.title" = "底层 pmset 实时参数";
+"telemetry.row.sleepdisabled" = "SleepDisabled (全局防休眠)";
+"telemetry.val.disabled" = "1 (已禁止休眠)";
+"telemetry.val.enabled" = "0 (允许正常休眠)";
+"telemetry.row.powersource" = "当前供电来源";
+"telemetry.row.displaysleep" = "显示器休眠 (displaysleep)";
+"telemetry.row.systemsleep" = "系统空闲休眠 (sleep)";
+"telemetry.row.hibernatemode" = "休眠映像模式 (hibernatemode)";
+"telemetry.val.never" = "永不";
+"telemetry.val.minutes" = "%@ 分钟";
+"telemetry.val.disabled_zero" = "已禁用 (0)";
+"telemetry.val.mode" = "模式 %@";
+"telemetry.val.on" = "已开启";
+"telemetry.val.off" = "已关闭";
+
+/* Activity Log Card */
+"log.card.title" = "最近状态与联动日志";
+"log.btn.clear" = "清空";
+"log.empty" = "暂无操作记录";
+
+/* Bottom & Header Actions */
+"action.open_dashboard" = "打开主窗口";
+"action.refresh" = "刷新";
+"action.sync" = "同步状态";
+"action.quit" = "退出";
+
+/* Log & Banner Messages */
+"msg.ready.title" = "系统状态已就绪";
+"msg.ready.detail" = "当前状态：%@ · %@";
+"msg.external_change.title" = "检测到外部状态变更";
+"msg.external_change.detail" = "系统休眠已变为：%@";
+"msg.toggle.disabled" = "已禁止系统休眠 (disablesleep 1)";
+"msg.toggle.enabled" = "已恢复允许休眠 (disablesleep 0)";
+"msg.toggle.source" = "触发来源：%@";
+"msg.toggle.failed" = "切换休眠状态未完成";
+"msg.reason.manual" = "手动切换开关";
+"msg.reason.hero_switch" = "主界面手动开关";
+"msg.reason.startup_sync" = "应用启动 · 电源联动对齐";
+"msg.reason.auto_enabled" = "开启电源智能联动";
+"msg.reason.auth_done_sync" = "免密配置完成 · 自动对齐电源状态";
+"msg.power.ac_connected" = "检测到接入交流电源 (AC)";
+"msg.power.battery_switched" = "检测到切换为电池供电";
+"msg.auto.turned_on.title" = "已开启「接入电源自动禁止休眠」";
+"msg.auto.turned_on.detail" = "插电将自动执行 disablesleep 1，拔电将自动恢复 disablesleep 0";
+"msg.auto.turned_off.title" = "已关闭「接入电源自动禁止休眠」";
+"msg.auto.turned_off.detail" = "插拔电源时将保持当前休眠设置不变";
+"msg.auth.canceled" = "已取消授权操作";
+"msg.auth.enabled.banner" = "已成功开启免密极速切换！后续开关与插拔电源将完全静默执行。";
+"msg.auth.enabled.title" = "已开启 pmset 免密授权";
+"msg.auth.enabled.detail" = "已配置 /etc/sudoers.d/mac_sleep_control";
+"msg.auth.revoked.banner" = "已移除免密配置，后续切换将请求系统管理员验证。";
+"msg.auth.revoked.title" = "已移除免密授权";
+"msg.auth.revoked.detail" = "已清理 /etc/sudoers.d/mac_sleep_control";
+"msg.launch.on" = "已开启登录时自动启动";
+"msg.launch.off" = "已关闭登录时自动启动";
+"msg.launch.detail" = "通过 macOS SMAppService 管理";
+"msg.launch.error" = "设置开机自启失败：%@";
+
+/* Errors */
+"err.passwordless_not_configured" = "尚未开启免密授权，请先点击「一键开启免密授权」以支持静默自动切换。";
+"err.user_canceled" = "已取消管理员权限验证。";
+"err.invalid_username" = "当前系统用户名 (%@) 格式不受支持。";
+"err.exec_failed" = "授权命令执行失败 (退出码 %d)";
