@@ -29,3 +29,12 @@
   - Override `constrainFrameRect(_:to:)` and explicitly clamp `(origin.x, origin.y)` within `screen.visibleFrame.insetBy(dx: 10, dy: 10)` when opening below the `NSStatusBarButton`.
   - Enable `.resizable` (`minWidth: 350, maxWidth: 540`) and `isMovableByWindowBackground = true` so the user can freely resize or reposition the panel if desired.
   - Maintain transient auto-dismiss behavior when clicking outside or resigning key status.
+
+## Decision 5: Emotional Companion Stage & Multi-Layer Aurora Aesthetic
+- **Status**: Accepted
+- **Context**: A purely utilitarian Bento dashboard feels static and lacks emotional resonance. Since `SleepControl` already features an adorable cat mascot (`status_cat_awake` / `status_cat_sleeping`), elevating the cat into an interactive, living desktop companion significantly increases emotional value without sacrificing technical clarity.
+- **Decision Outcome**:
+  - **High-Res Full-Detail Companion Artwork**: Extracted `hero_cat_awake` and `hero_cat_sleeping` (`@1x` and `@2x` full-detail PNGs with smooth un-premultiplied white alpha edges) from the original artwork so the hero stage preserves the cat's inner ears, whiskers, pupils, nose, and 3D fur shading.
+  - **Living Micro-Animations via `TimelineView`**: Used `TimelineView(.animation)` sine-wave modulation to drive continuous breathing scale/elevation, outer halo pulsing, floating `"z Z"` sleep particles + twinkling stars when sleep is allowed, and golden sparkles when keeping the Mac awake.
+  - **Interactive Petting & Companion Speech Bubble**: Clicking the cat stage or the companion speech bubble triggers `AppController.petCompanion()`, bouncing the cat with a spring animation, popping a floating heart badge, and cycling localized 1st-person companion quotes across all 5 supported languages.
+  - **Multi-Layer Aurora Ambient Backdrop**: Added `AuroraAmbientBackdrop` with drifting radial color orbs (warm golden-coral sunrise when awake; midnight indigo-violet nebula when sleeping) to both `MainWindowView` and `MenuBarPopoverView`.

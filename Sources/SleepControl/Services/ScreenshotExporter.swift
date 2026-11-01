@@ -14,14 +14,14 @@ enum ScreenshotExporter {
         controller.selectLanguage(.en)
         exportWindowSnapshot(
             rootView: MainWindowView(controller: controller).environment(\.colorScheme, .dark),
-            size: NSSize(width: 840, height: 830),
+            size: NSSize(width: 850, height: 875),
             to: "\(directoryPath)/dashboard_en.png"
         )
         exportWindowSnapshot(
             rootView: MenuBarPopoverView(controller: controller)
                 .background(Color(nsColor: .windowBackgroundColor))
                 .environment(\.colorScheme, .dark),
-            size: NSSize(width: 420, height: 340),
+            size: NSSize(width: 455, height: 390),
             to: "\(directoryPath)/menubar_popover_en.png"
         )
 
@@ -29,14 +29,14 @@ enum ScreenshotExporter {
         controller.selectLanguage(.zhHans)
         exportWindowSnapshot(
             rootView: MainWindowView(controller: controller).environment(\.colorScheme, .dark),
-            size: NSSize(width: 840, height: 830),
+            size: NSSize(width: 850, height: 875),
             to: "\(directoryPath)/dashboard_zh.png"
         )
         exportWindowSnapshot(
             rootView: MenuBarPopoverView(controller: controller)
                 .background(Color(nsColor: .windowBackgroundColor))
                 .environment(\.colorScheme, .dark),
-            size: NSSize(width: 420, height: 340),
+            size: NSSize(width: 455, height: 390),
             to: "\(directoryPath)/menubar_popover_zh.png"
         )
 

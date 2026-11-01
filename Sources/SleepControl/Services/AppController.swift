@@ -24,6 +24,12 @@ final class AppController: ObservableObject {
     @Published private(set) var launchAtLoginEnabled: Bool = false
     /// Recent activity log items
     @Published private(set) var activityLogs: [ActivityLogItem] = []
+    /// Active companion quote index (0...2) cycled when petting the cat
+    @Published private(set) var companionQuoteIndex: Int = 0
+    /// Transient bounce state when user pets the companion cat
+    @Published private(set) var isPetBouncing: Bool = false
+    /// Transient floating heart badge when user pets the companion cat
+    @Published private(set) var showPetHeart: Bool = false
 
     /// Active interface language (defaults to system `.system`, falls back to `.en`)
     @Published var appLanguage: AppLanguage {
@@ -219,6 +225,10 @@ final class AppController: ObservableObject {
         )
 
         guard autoDisableOnAC else { return }
+        let companionBanner = (newSnapshot.source == .ac)
+            ? L("msg.power.ac_companion_banner")
+            : L("msg.power.battery_companion_banner")
+        showBanner(companionBanner, isError: false)
         reconcileSleepWithCurrentPower(reason: sourceEventTitle)
     }
 
@@ -345,6 +355,31 @@ final class AppController: ObservableObject {
     }
 
     // MARK: - Helper Methods
+
+    /// Cycles the companion cat quote and triggers a playful bounce/heart micro-animation
+    func petCompanion() {
+        withAnimation(.spring(response: 0.28, dampingFraction: 0.45)) {
+            companionQuoteIndex = (companionQuoteIndex + 1) % 3
+            isPetBouncing = true
+            showPetHeart = true
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.26) { [weak self] in
+            withAnimation(.spring(response: 0.35, dampingFraction: 0.65)) {
+                self?.isPetBouncing = false
+            }
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.1) { [weak self] in
+            withAnimation(.easeOut(duration: 0.25)) {
+                self?.showPetHeart = false
+            }
+        }
+    }
+
+    /// Returns the localized companion dialogue line for the current state and quote index
+    var currentCompanionQuote: String {
+        let prefix = isSleepDisabled ? "companion.quote.awake" : "companion.quote.sleep"
+        return L("\(prefix).\(companionQuoteIndex % 3)")
+    }
 
     func showBanner(_ message: String, isError: Bool) {
         withAnimation(.easeInOut(duration: 0.25)) {

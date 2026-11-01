@@ -31,8 +31,9 @@ cp ".build/AppIcon.icns" "${APP_BUNDLE}/Contents/Resources/AppIcon.icns"
 # Copy standard i18n .lproj language bundles
 cp -R Sources/SleepControl/Resources/*.lproj "${APP_BUNDLE}/Contents/Resources/"
 
-# Copy custom status bar template icons
+# Copy custom status bar template icons and high-res hero companion icons
 cp -f Resources/status_cat_*.png "${APP_BUNDLE}/Contents/Resources/"
+cp -f Resources/hero_cat_*.png "${APP_BUNDLE}/Contents/Resources/"
 
 cat > "${APP_BUNDLE}/Contents/Info.plist" <<EOF
 <?xml version="1.0" encoding="UTF-8"?>

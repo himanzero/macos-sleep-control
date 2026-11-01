@@ -6,7 +6,11 @@ struct MenuBarPopoverView: View {
     @ObservedObject var controller: AppController
 
     var body: some View {
-        VStack(spacing: 12) {
+        ZStack {
+            // Subtle Aurora ambient glow inside the floating popover
+            AuroraAmbientBackdrop(isSleepDisabled: controller.isSleepDisabled, intensity: 0.75)
+
+            VStack(spacing: 12) {
             // Header: Branding, Language Switcher, and Sudoers Authorization Badge
             HStack(spacing: 6) {
                 HStack(spacing: 6) {
@@ -31,7 +35,8 @@ struct MenuBarPopoverView: View {
                         .font(.system(size: 11, weight: .medium))
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
-                        .truncationMode(.tail)
+                        .minimumScaleFactor(0.8)
+                        .fixedSize(horizontal: true, vertical: false)
                 }
 
                 Spacer(minLength: 4)
@@ -209,10 +214,11 @@ struct MenuBarPopoverView: View {
                 }
                 .buttonStyle(.plain)
             }
-            .padding(.top, 2)
+                .padding(.top, 2)
+            }
+            .padding(14)
         }
-        .padding(14)
-        .frame(minWidth: 350, idealWidth: 400, maxWidth: 540)
+        .frame(minWidth: 380, idealWidth: 440, maxWidth: 540)
     }
 
     private func openMainDashboard() {

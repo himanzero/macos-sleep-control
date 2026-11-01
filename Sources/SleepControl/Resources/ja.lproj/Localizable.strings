@@ -23,6 +23,17 @@
 "hero.button.allow_sleep" = "スリープを許可";
 "hero.button.disable_sleep" = "今すぐスリープ禁止";
 
+/* Companion Mood & Interactive Quotes */
+"companion.mood.awake.badge" = "元気いっぱい見守り中";
+"companion.mood.sleep.badge" = "すやすや居眠り中";
+"companion.pet.hint" = "クリックで猫をなでる";
+"companion.quote.awake.0" = "にゃー！しっかり見張り中だよ。ふたを閉じても安心にゃ〜";
+"companion.quote.awake.1" = "お耳ピーン！バックグラウンド処理も外部モニターもお任せにゃ〜";
+"companion.quote.awake.2" = "ゴロゴロ〜 フル充電でMacをばっちり護衛中にゃ！";
+"companion.quote.sleep.0" = "ゴロゴロ… macOSと一緒にすやすや省エネお昼寝中にゃ〜";
+"companion.quote.sleep.1" = "Zzz… 画面を閉じて、一緒に星空の夢を見ようにゃ〜";
+"companion.quote.sleep.2" = "ぽかぽか気持ちいいにゃ…バッテリーを大切に温存中〜";
+
 /* Power Source */
 "power.source.ac" = "AC電源";
 "power.source.battery" = "バッテリー電源";
@@ -108,6 +119,8 @@
 "msg.reason.auth_done_sync" = "認証設定完了 · 電源状態と自動同期";
 "msg.power.ac_connected" = "AC電源の接続を検出";
 "msg.power.battery_switched" = "バッテリー駆動への切り替えを検出";
+"msg.power.ac_companion_banner" = "⚡️ AC電源に接続！子猫が目を覚ましてMacの見守りを開始しましたにゃ！";
+"msg.power.battery_companion_banner" = "🌙 バッテリー駆動に切り替え。子猫もMacと一緒に省エネモードでお休み中にゃ〜";
 "msg.auto.turned_on.title" = "「電源接続時に自動スリープ禁止」を有効化";
 "msg.auto.turned_on.detail" = "AC接続で disablesleep 1、バッテリー駆動で disablesleep 0 を自動実行します";
 "msg.auto.turned_off.title" = "「電源接続時に自動スリープ禁止」を無効化";

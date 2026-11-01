@@ -7,17 +7,8 @@ struct MainWindowView: View {
 
     var body: some View {
         ZStack {
-            // Background dynamic ambient light gradient
-            LinearGradient(
-                colors: [
-                    AppTheme.accentColor(isSleepDisabled: controller.isSleepDisabled).opacity(0.10),
-                    Color(nsColor: .windowBackgroundColor),
-                    Color(nsColor: .underPageBackgroundColor).opacity(0.6)
-                ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-            .ignoresSafeArea()
+            // Multi-layered Aurora ambient backdrop
+            AuroraAmbientBackdrop(isSleepDisabled: controller.isSleepDisabled, intensity: 1.0)
 
             ScrollView {
                 VStack(alignment: .leading, spacing: 18) {
@@ -55,7 +46,7 @@ struct MainWindowView: View {
                 .padding(24)
             }
         }
-        .frame(minWidth: 780, idealWidth: 840, minHeight: 740, idealHeight: 790)
+        .frame(minWidth: 780, idealWidth: 850, minHeight: 760, idealHeight: 830)
     }
 
     // MARK: - Header Section

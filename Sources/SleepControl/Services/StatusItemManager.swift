@@ -48,7 +48,7 @@ final class StatusItemManager: NSObject, NSWindowDelegate {
     private var statusPanel: StatusBarPanel?
     private var panelHostingView: NSHostingView<MenuBarPopoverView>?
     private var outsideClickMonitor: Any?
-    private var preferredPanelWidth: CGFloat = 400
+    private var preferredPanelWidth: CGFloat = 440
     private var mainWindow: NSWindow?
     private var controller: AppController?
     private var cancellables = Set<AnyCancellable>()
@@ -130,8 +130,8 @@ final class StatusItemManager: NSObject, NSWindowDelegate {
         panel.hasShadow = true
         panel.isReleasedWhenClosed = false
         panel.isRestorable = false
-        panel.minSize = NSSize(width: 350, height: 300)
-        panel.maxSize = NSSize(width: 540, height: 560)
+        panel.minSize = NSSize(width: 370, height: 330)
+        panel.maxSize = NSSize(width: 540, height: 640)
         panel.delegate = self
 
         let visualEffect = NSVisualEffectView(frame: initialRect)
@@ -178,8 +178,8 @@ final class StatusItemManager: NSObject, NSWindowDelegate {
             // Preserve the window instance when the user clicks the close ('x') button so it can be re-shown anytime
             window.isReleasedWhenClosed = false
             window.delegate = self
-            window.setContentSize(NSSize(width: 840, height: 790))
-            window.minSize = NSSize(width: 780, height: 720)
+            window.setContentSize(NSSize(width: 850, height: 830))
+            window.minSize = NSSize(width: 780, height: 750)
             window.center()
             self.mainWindow = window
         }

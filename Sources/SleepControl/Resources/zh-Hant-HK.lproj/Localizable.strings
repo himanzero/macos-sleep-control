@@ -23,6 +23,17 @@
 "hero.button.allow_sleep" = "恢復允許休眠";
 "hero.button.disable_sleep" = "立即禁止休眠";
 
+/* Companion Mood & Interactive Quotes */
+"companion.mood.awake.badge" = "精神百倍守候中";
+"companion.mood.sleep.badge" = "呼嚕嚕安心打盹中";
+"companion.pet.hint" = "點擊摸摸小貓";
+"companion.quote.awake.0" = "喵！我正在為你精神百倍守候，放心合上蓋子啦~";
+"companion.quote.awake.1" = "耳朵豎起！背景任務同外置芒都由我穩陣守護喵~";
+"companion.quote.awake.2" = "呼嚕嚕~ 小貓滿電當值中，Mac 隨時保持最佳狀態！";
+"companion.quote.sleep.0" = "呼嚕嚕…小貓正伴隨系統安心打盹，隨時準備慳電休眠~";
+"companion.quote.sleep.1" = "Zzz… 合上熒幕就可以同我一齊進入星夜夢鄉啦~";
+"companion.quote.sleep.2" = "好舒服呀…正幫你粒電池悄悄儲滿能量呢~";
+
 /* Power Source */
 "power.source.ac" = "交流電源 (AC)";
 "power.source.battery" = "電池供電";
@@ -108,6 +119,8 @@
 "msg.reason.auth_done_sync" = "免密設定完成 · 自動同步電源狀態";
 "msg.power.ac_connected" = "偵測到接駁交流電源 (AC)";
 "msg.power.battery_switched" = "偵測到切換為電池供電";
+"msg.power.ac_companion_banner" = "⚡️ 偵測到接駁電源，小貓已精神百倍進入守候狀態！";
+"msg.power.battery_companion_banner" = "🌙 已切換為電池供電，小貓正陪 Mac 一齊打盹慳電啦~";
 "msg.auto.turned_on.title" = "已開啟「接駁電源自動禁止休眠」";
 "msg.auto.turned_on.detail" = "插電將自動執行 disablesleep 1，拔電將自動恢復 disablesleep 0";
 "msg.auto.turned_off.title" = "已關閉「接駁電源自動禁止休眠」";
