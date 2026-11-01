@@ -198,7 +198,7 @@ struct MenuBarPopoverView: View {
             .padding(.top, 2)
         }
         .padding(14)
-        .frame(width: 390)
+        .frame(width: 420)
     }
 
     private func openMainDashboard() {

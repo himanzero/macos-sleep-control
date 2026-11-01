@@ -55,7 +55,7 @@ struct MainWindowView: View {
                 .padding(24)
             }
         }
-        .frame(minWidth: 760, idealWidth: 800, minHeight: 650, idealHeight: 690)
+        .frame(minWidth: 780, idealWidth: 840, minHeight: 740, idealHeight: 790)
     }
 
     // MARK: - Header Section

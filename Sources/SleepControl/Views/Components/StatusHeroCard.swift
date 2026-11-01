@@ -111,35 +111,43 @@ struct StatusHeroCard: View {
     var body: some View {
         let isAwake = controller.isSleepDisabled
         let accent = AppTheme.accentColor(isSleepDisabled: isAwake)
+        let radius: CGFloat = isCompact ? 16 : 20
 
         ZStack {
-            // Background dynamic blur & ambient glow
-            RoundedRectangle(cornerRadius: isCompact ? 16 : 20, style: .continuous)
+            // Background dynamic blur & ambient radial glow clipped strictly to card bounds
+            RoundedRectangle(cornerRadius: radius, style: .continuous)
                 .fill(.ultraThinMaterial)
 
-            RoundedRectangle(cornerRadius: isCompact ? 16 : 20, style: .continuous)
+            RoundedRectangle(cornerRadius: radius, style: .continuous)
                 .fill(isAwake ? AppTheme.awakeGradient : AppTheme.sleepAllowedGradient)
                 .opacity(0.16)
 
-            // Ambient background glow orb
-            Circle()
-                .fill(accent.opacity(0.28))
-                .frame(width: isCompact ? 130 : 180, height: isCompact ? 130 : 180)
-                .blur(radius: 36)
-                .offset(x: isCompact ? 90 : 150, y: -40)
+            RoundedRectangle(cornerRadius: radius, style: .continuous)
+                .fill(
+                    RadialGradient(
+                        colors: [
+                            accent.opacity(0.28),
+                            accent.opacity(0.08),
+                            Color.clear
+                        ],
+                        center: .topTrailing,
+                        startRadius: 10,
+                        endRadius: isCompact ? 220 : 340
+                    )
+                )
                 .allowsHitTesting(false)
 
             VStack(alignment: .leading, spacing: isCompact ? 14 : 18) {
-                HStack(alignment: .center, spacing: 14) {
+                HStack(alignment: .center, spacing: isCompact ? 12 : 14) {
                     // Animated status badge icon
                     ZStack {
                         Circle()
                             .fill(isAwake ? AppTheme.awakeGradient : AppTheme.sleepAllowedGradient)
-                            .frame(width: isCompact ? 46 : 56, height: isCompact ? 46 : 56)
+                            .frame(width: isCompact ? 44 : 56, height: isCompact ? 44 : 56)
                             .shadow(color: accent.opacity(0.45), radius: 10, x: 0, y: 4)
 
                         Image(systemName: isAwake ? "cup.and.saucer.fill" : "moon.stars.fill")
-                            .font(.system(size: isCompact ? 20 : 24, weight: .semibold))
+                            .font(.system(size: isCompact ? 19 : 24, weight: .semibold))
                             .foregroundStyle(.white)
                             .symbolEffect(.bounce, value: isAwake)
                     }
@@ -147,8 +155,10 @@ struct StatusHeroCard: View {
                     VStack(alignment: .leading, spacing: 4) {
                         HStack(spacing: 8) {
                             Text(isAwake ? L("hero.status.disabled") : L("hero.status.enabled"))
-                                .font(.system(size: isCompact ? 16 : 20, weight: .bold, design: .rounded))
+                                .font(.system(size: isCompact ? 15.5 : 20, weight: .bold, design: .rounded))
                                 .foregroundStyle(.primary)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.75)
 
                             // Telemetry tag capsule
                             HStack(spacing: 4) {
@@ -157,6 +167,7 @@ struct StatusHeroCard: View {
                                     .frame(width: 6, height: 6)
                                 Text(isAwake ? "disablesleep 1" : "disablesleep 0")
                                     .font(.system(size: 10, weight: .semibold, design: .monospaced))
+                                    .lineLimit(1)
                             }
                             .padding(.horizontal, 7)
                             .padding(.vertical, 3)
@@ -165,15 +176,17 @@ struct StatusHeroCard: View {
                                     .fill(accent.opacity(0.16))
                             )
                             .foregroundStyle(accent)
+                            .fixedSize()
                         }
 
                         Text(isAwake ? L("hero.desc.disabled") : L("hero.desc.enabled"))
                             .font(.system(size: isCompact ? 11.5 : 13))
                             .foregroundStyle(.secondary)
                             .lineLimit(1)
+                            .minimumScaleFactor(0.85)
                     }
 
-                    Spacer(minLength: 8)
+                    Spacer(minLength: 6)
 
                     // Main control toggle switch
                     if controller.isBusy {
@@ -198,11 +211,13 @@ struct StatusHeroCard: View {
                     .opacity(0.5)
 
                 // Bottom telemetry and quick action strip
-                HStack(spacing: 10) {
+                HStack(spacing: 8) {
                     // Power source snapshot capsule
                     Label {
                         Text(controller.powerSnapshot.formattedSummary)
                             .font(.system(size: 11.5, weight: .medium))
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.85)
                     } icon: {
                         Image(systemName: controller.powerSnapshot.source.symbolName)
                             .foregroundStyle(controller.powerSnapshot.source == .ac ? .green : .orange)
@@ -214,7 +229,7 @@ struct StatusHeroCard: View {
                             .fill(Color.primary.opacity(0.06))
                     )
 
-                    Spacer()
+                    Spacer(minLength: 4)
 
                     // Quick toggle button
                     Button {
@@ -225,6 +240,7 @@ struct StatusHeroCard: View {
                                 .font(.system(size: 11, weight: .semibold))
                             Text(isAwake ? L("hero.button.allow_sleep") : L("hero.button.disable_sleep"))
                                 .font(.system(size: 11.5, weight: .semibold))
+                                .lineLimit(1)
                         }
                         .padding(.horizontal, 10)
                         .padding(.vertical, 5)
@@ -235,13 +251,15 @@ struct StatusHeroCard: View {
                         .foregroundStyle(accent)
                     }
                     .buttonStyle(.plain)
+                    .fixedSize()
                     .disabled(controller.isBusy)
                 }
             }
             .padding(isCompact ? 15 : 20)
         }
+        .clipShape(RoundedRectangle(cornerRadius: radius, style: .continuous))
         .overlay(
-            RoundedRectangle(cornerRadius: isCompact ? 16 : 20, style: .continuous)
+            RoundedRectangle(cornerRadius: radius, style: .continuous)
                 .strokeBorder(
                     LinearGradient(
                         colors: [

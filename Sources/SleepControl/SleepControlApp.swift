@@ -14,6 +14,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        let args = CommandLine.arguments
+        if let idx = args.firstIndex(of: "--export-screenshots"), idx + 1 < args.count {
+            let outputDir = args[idx + 1]
+            ScreenshotExporter.exportAll(to: outputDir, controller: AppController.shared)
+            NSApp.terminate(nil)
+            return
+        }
+
         NSWindow.allowsAutomaticWindowTabbing = false
         setupMainMenu()
         StatusItemManager.shared.setup(with: AppController.shared)

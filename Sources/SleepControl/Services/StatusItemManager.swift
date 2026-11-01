@@ -79,8 +79,8 @@ final class StatusItemManager: NSObject, NSWindowDelegate {
             // Preserve the window instance when the user clicks the close ('x') button so it can be re-shown anytime
             window.isReleasedWhenClosed = false
             window.delegate = self
-            window.setContentSize(NSSize(width: 800, height: 690))
-            window.minSize = NSSize(width: 760, height: 650)
+            window.setContentSize(NSSize(width: 840, height: 790))
+            window.minSize = NSSize(width: 780, height: 720)
             window.center()
             self.mainWindow = window
         }
