@@ -3,12 +3,13 @@ name: app_development_guide
 description: >-
   Project development guide and standards for SleepControl. Enforces i18n localization standards,
   English-only development and documentation, automated recording of dev logs (dev_logs/) and key
-  decisions (key_decisions/), and strict git commit approval workflows (never auto-commit).
+  decisions (key_decisions/), automatic cleanup of scratch/temporary files upon task completion,
+  and strict git commit approval workflows (never auto-commit).
 ---
 
 # App Development Guide (`SleepControl`)
 
-This skill defines the mandatory engineering practices, documentation rules, localization standards, and git workflows for the `SleepControl` project.
+This skill defines the mandatory engineering practices, documentation rules, localization standards, file cleanup hygiene, and git workflows for the `SleepControl` project.
 
 ---
 
@@ -47,7 +48,6 @@ This skill defines the mandatory engineering practices, documentation rules, loc
 ---
 
 ## 4. Key Decisions Summary (`key_decisions/`)
-> *Spelling Note: "decesions" is corrected to "decisions".*
 - Maintain a structured, module-by-module summary of key technical decisions in the `key_decisions/` directory.
 - Organize summaries by module or architectural domain:
   - `key_decisions/power_management_and_iokit.md`: Hardware-level power detection, zero-polling design.
@@ -61,7 +61,17 @@ This skill defines the mandatory engineering practices, documentation rules, loc
 
 ---
 
-## 5. Strict Git Commit Workflow (NEVER Auto-Commit)
+## 5. Automatic Cleanup of Process & Temporary Files
+- **Zero Temporary File Residue**: The agent must always clean up any scratch, intermediate, or process-generated temporary files upon completing coding or asset generation tasks.
+- **Scope of Cleanup**:
+  - Temporary conversion/test scripts (e.g. `/tmp/test_*.swift`, scratch converters).
+  - Outdated, superseded, or intermediate assets in `Resources/` or `docs/assets/` (e.g. obsolete cuts, unreferenced resolution variants, temporary previews).
+  - Build residue outside `.build/` that does not belong in version control.
+- **Verification Rule**: Before finishing the turn or presenting status to the user, run `git status` or inspect directories to ensure no unneeded artifacts or process clutter remain.
+
+---
+
+## 6. Strict Git Commit Workflow (NEVER Auto-Commit)
 - **Zero Auto-Commit Policy**: The agent must **NEVER** execute `git commit` automatically under any circumstance.
 - **Two-Step Approval Protocol**:
   1. **Step 1 - Ask for Decision**: Upon completing a feature, bugfix, or refactor, present the summary of changes to the user and explicitly ask whether they wish to commit.

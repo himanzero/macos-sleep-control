@@ -15,7 +15,10 @@ These rules must be strictly followed for all development tasks in this reposito
 4. **Key Decisions Summary (`key_decisions/`)**:
    - Maintain module-by-module architectural decisions and rationale under `key_decisions/<module>.md`.
 
-5. **Strict Git Commit Workflow (NEVER Auto-Commit)**:
+5. **Automatic Cleanup of Temporary & Process Files**:
+   - Always delete intermediate, scratch, and temporary files upon completing coding or asset generation tasks. Keep `Resources/`, `docs/`, and project directories strictly clean.
+
+6. **Strict Git Commit Workflow (NEVER Auto-Commit)**:
    - **Never run `git commit` automatically.**
    - When a development task finishes, ask the user if they want to commit.
    - When the user asks to commit, recommend a clear English commit comment first.
