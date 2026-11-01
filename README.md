@@ -1,11 +1,15 @@
 # SleepControl — macOS Power & Sleep Management Utility
 
+[![Release](https://img.shields.io/github/v/release/himanzero/macos-sleep-control)](https://github.com/himanzero/macos-sleep-control/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/himanzero/macos-sleep-control/total)](https://github.com/himanzero/macos-sleep-control/releases)
 [![Platform](https://img.shields.io/badge/Platform-macOS%2014.0%2B-blue.svg)](https://www.apple.com/macos/)
 [![Language](https://img.shields.io/badge/Swift-5.10%2B-orange.svg)](https://swift.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Architecture](https://img.shields.io/badge/Architecture-Apple%20Silicon%20%7C%20Intel-lightgrey.svg)]()
 
 ![SleepControl App Icon](docs/assets/app_icon.png)
+
+**Keep your Mac awake with the lid closed.** A lightweight alternative to Amphetamine / Caffeine, built on `pmset disablesleep`.
 
 `SleepControl.app` is a modern native macOS utility built with **Swift + SwiftUI + AppKit + IOKit**. It seamlessly bridges `sudo pmset -a disablesleep 1` (preventing system and clamshell sleep) and `sudo pmset -a disablesleep 0` (restoring default energy conservation) into an elegant, lightweight desktop app.
 
@@ -60,7 +64,29 @@
 
 ---
 
-## 🚀 Building from Source
+## 📥 Download & Installation
+
+1. Download the latest `SleepControl-*.zip` from the [**Releases page**](https://github.com/himanzero/macos-sleep-control/releases/latest).
+2. Unzip it and drag `SleepControl.app` into your `/Applications` folder.
+3. **First launch (Gatekeeper)**: the app is ad-hoc signed (not notarized), so macOS may block it on first launch. Either:
+   - Right-click `SleepControl.app` → **Open** → **Open**, or
+   - Run in Terminal:
+     ```zsh
+     xattr -dr com.apple.quarantine /Applications/SleepControl.app
+     ```
+
+**Requirements**: macOS 14.0 (Sonoma) or later, Apple Silicon or Intel.
+
+### First-Time Setup
+On first use, click **Configure** in the app to enable passwordless `sudo` for `/usr/bin/pmset` (one-time Touch ID / password prompt). After that, all toggles and AC automation run silently.
+
+### Uninstall
+1. In the app, click **Revoke** to remove the passwordless authorization (or manually delete `/etc/sudoers.d/mac_sleep_control`).
+2. Quit the app and delete `SleepControl.app`.
+
+---
+
+## 🛠 Building from Source
 
 ### Prerequisites
 - macOS 14.0 (Sonoma) or later
@@ -70,8 +96,8 @@
 Clone the repository and run the automated build script:
 
 ```zsh
-git clone https://github.com/himanzero/app-mac-sleep-control.git
-cd app-mac-sleep-control
+git clone https://github.com/himanzero/macos-sleep-control.git
+cd macos-sleep-control
 ./build_app.sh
 ```
 
@@ -93,6 +119,12 @@ cp -R SleepControl.app /Applications/
 - **No Network Telemetry**: Zero data collection, tracking, or network requests.
 - **Scoped Privilege Boundary**: Passwordless sudoers configuration is strictly scoped to `/usr/bin/pmset` with read/write protections and syntax validation.
 - **Safe Sandboxing of Settings**: Preferences are stored locally in standard `UserDefaults`.
+
+---
+
+## 🤝 Contributing
+
+Issues and pull requests are welcome! Please open an [issue](https://github.com/himanzero/macos-sleep-control/issues) to report bugs or suggest features.
 
 ---
 
