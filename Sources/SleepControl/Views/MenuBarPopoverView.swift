@@ -10,7 +10,17 @@ struct MenuBarPopoverView: View {
             // Header: Branding, Language Switcher, and Sudoers Authorization Badge
             HStack(spacing: 6) {
                 HStack(spacing: 6) {
-                    Image(systemName: controller.isSleepDisabled ? "cup.and.saucer.fill" : "moon.stars.fill")
+                    Group {
+                    if let img = NSImage(named: controller.isSleepDisabled ? "status_cat_awake" : "status_cat_sleeping") {
+                        Image(nsImage: img)
+                            .renderingMode(.template)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 18, height: 18)
+                    } else {
+                        Image(systemName: controller.isSleepDisabled ? "cat" : "cat.fill")
+                    }
+                }
                         .font(.system(size: 13, weight: .bold))
                         .foregroundStyle(AppTheme.accentColor(isSleepDisabled: controller.isSleepDisabled))
                     Text(L("app.name"))

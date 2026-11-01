@@ -105,12 +105,27 @@ final class StatusItemManager: NSObject, NSWindowDelegate {
     /// Updates status bar button icon and tooltip based on active sleep state
     private func updateIcon(isSleepDisabled: Bool) {
         guard let button = statusItem?.button else { return }
-        let symbolName = isSleepDisabled ? "cup.and.saucer.fill" : "moon.zzz.fill"
-        let config = NSImage.SymbolConfiguration(pointSize: 14, weight: .semibold)
-        let image = NSImage(systemSymbolName: symbolName, accessibilityDescription: "SleepControl")?
-            .withSymbolConfiguration(config)
-        image?.isTemplate = true
-        button.image = image
+
+        let iconName = isSleepDisabled ? "status_cat_awake" : "status_cat_sleeping"
+        if let bundleImage = Bundle.main.image(forResource: iconName) {
+            bundleImage.isTemplate = true
+            bundleImage.size = NSSize(width: 18, height: 18)
+            button.image = bundleImage
+        } else if let resourcePath = Bundle.main.path(forResource: iconName, ofType: "png"),
+                  let fileImage = NSImage(contentsOfFile: resourcePath) {
+            fileImage.isTemplate = true
+            fileImage.size = NSSize(width: 18, height: 18)
+            button.image = fileImage
+        } else {
+            // Fallback to SF Symbol
+            let fallbackSymbol = isSleepDisabled ? "cat" : "cat.fill"
+            let config = NSImage.SymbolConfiguration(pointSize: 14, weight: .semibold)
+            let image = NSImage(systemSymbolName: fallbackSymbol, accessibilityDescription: "SleepControl")?
+                .withSymbolConfiguration(config)
+            image?.isTemplate = true
+            button.image = image
+        }
+
         button.toolTip = isSleepDisabled ? L("hero.status.disabled") : L("hero.status.enabled")
     }
 

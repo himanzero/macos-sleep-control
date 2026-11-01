@@ -31,6 +31,9 @@ cp ".build/AppIcon.icns" "${APP_BUNDLE}/Contents/Resources/AppIcon.icns"
 # Copy standard i18n .lproj language bundles
 cp -R Sources/SleepControl/Resources/*.lproj "${APP_BUNDLE}/Contents/Resources/"
 
+# Copy custom status bar template icons
+cp -f Resources/status_cat_*.png "${APP_BUNDLE}/Contents/Resources/"
+
 cat > "${APP_BUNDLE}/Contents/Info.plist" <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">

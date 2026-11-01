@@ -146,10 +146,18 @@ struct StatusHeroCard: View {
                             .frame(width: isCompact ? 44 : 56, height: isCompact ? 44 : 56)
                             .shadow(color: accent.opacity(0.45), radius: 10, x: 0, y: 4)
 
-                        Image(systemName: isAwake ? "cup.and.saucer.fill" : "moon.stars.fill")
-                            .font(.system(size: isCompact ? 19 : 24, weight: .semibold))
-                            .foregroundStyle(.white)
-                            .symbolEffect(.bounce, value: isAwake)
+                        if let img = NSImage(named: isAwake ? "status_cat_awake" : "status_cat_sleeping") {
+                            Image(nsImage: img)
+                                .renderingMode(.template)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: isCompact ? 24 : 32, height: isCompact ? 24 : 32)
+                                .foregroundStyle(.white)
+                        } else {
+                            Image(systemName: isAwake ? "cat" : "cat.fill")
+                                .font(.system(size: isCompact ? 19 : 24, weight: .semibold))
+                                .foregroundStyle(.white)
+                        }
                     }
 
                     VStack(alignment: .leading, spacing: 4) {
