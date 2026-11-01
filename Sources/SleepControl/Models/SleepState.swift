@@ -6,15 +6,19 @@ enum PowerSourceKind: String, Equatable {
     case battery = "Battery Power"
     case unknown = "Unknown"
 
-    var displayName: String {
+    func localizedDisplayName(in language: AppLanguage? = nil) -> String {
         switch self {
         case .ac:
-            return L("power.source.ac")
+            return I18n.shared.localized("power.source.ac", in: language)
         case .battery:
-            return L("power.source.battery")
+            return I18n.shared.localized("power.source.battery", in: language)
         case .unknown:
-            return L("power.source.unknown")
+            return I18n.shared.localized("power.source.unknown", in: language)
         }
+    }
+
+    var displayName: String {
+        localizedDisplayName()
     }
 
     var shortBadgeText: String {
@@ -47,21 +51,29 @@ struct PowerSnapshot: Equatable {
     var isCharging: Bool = false
     var isCharged: Bool = false
 
-    var formattedSummary: String {
+    func formattedSummary(in language: AppLanguage? = nil) -> String {
         if let pct = batteryPercentage {
             switch source {
             case .ac:
                 let status = isCharging
-                    ? L("power.status.charging")
-                    : (isCharged ? L("power.status.charged") : L("power.status.external"))
-                return LF("power.summary.ac", source.displayName, pct, status)
+                    ? I18n.shared.localized("power.status.charging", in: language)
+                    : (isCharged
+                        ? I18n.shared.localized("power.status.charged", in: language)
+                        : I18n.shared.localized("power.status.external", in: language))
+                let sourceName = source.localizedDisplayName(in: language)
+                return I18n.shared.format("power.summary.ac", in: language, args: [sourceName, pct, status])
             case .battery:
-                return LF("power.summary.battery", source.displayName, pct)
+                let sourceName = source.localizedDisplayName(in: language)
+                return I18n.shared.format("power.summary.battery", in: language, args: [sourceName, pct])
             case .unknown:
                 return "\(pct)%"
             }
         }
-        return source.displayName
+        return source.localizedDisplayName(in: language)
+    }
+
+    var formattedSummary: String {
+        formattedSummary(in: nil)
     }
 }
 
@@ -101,18 +113,162 @@ struct PmsetTelemetry: Equatable {
     }
 }
 
-/// Activity log item model
+/// Dynamic parameter for localized activity log messages
+enum ActivityLogParameter: Equatable {
+    case string(String)
+    case localizedKey(String)
+    case sleepState(isSleepDisabled: Bool)
+    case powerSnapshot(PowerSnapshot)
+    case error(SleepControlError)
+
+    func resolve(in language: AppLanguage? = nil) -> String {
+        switch self {
+        case .string(let str):
+            return str
+        case .localizedKey(let key):
+            return I18n.shared.localized(key, in: language)
+        case .sleepState(let disabled):
+            return I18n.shared.localized(disabled ? "telemetry.val.disabled" : "telemetry.val.enabled", in: language)
+        case .powerSnapshot(let snapshot):
+            return snapshot.formattedSummary(in: language)
+        case .error(let err):
+            return err.localizedErrorDescription(in: language)
+        }
+    }
+}
+
+/// Activity log item model supporting dynamic runtime re-localization across languages
 struct ActivityLogItem: Identifiable, Equatable {
-    let id = UUID()
+    let id: UUID
     let timestamp: Date
-    let title: String
-    let detail: String
+    let titleKey: String
+    let titleArgs: [ActivityLogParameter]
+    let detailKey: String?
+    let detailArgs: [ActivityLogParameter]
+    let customDetailFormat: String?
     let isSuccess: Bool
     let isAutomated: Bool
 
-    var formattedTime: String {
+    init(
+        id: UUID = UUID(),
+        timestamp: Date = Date(),
+        titleKey: String,
+        titleArgs: [ActivityLogParameter] = [],
+        detailKey: String? = nil,
+        detailArgs: [ActivityLogParameter] = [],
+        customDetailFormat: String? = nil,
+        isSuccess: Bool,
+        isAutomated: Bool
+    ) {
+        self.id = id
+        self.timestamp = timestamp
+        self.titleKey = titleKey
+        self.titleArgs = titleArgs
+        self.detailKey = detailKey
+        self.detailArgs = detailArgs
+        self.customDetailFormat = customDetailFormat
+        self.isSuccess = isSuccess
+        self.isAutomated = isAutomated
+    }
+
+    /// Backward compatibility initializer for plain pre-rendered strings
+    init(
+        id: UUID = UUID(),
+        timestamp: Date = Date(),
+        title: String,
+        detail: String,
+        isSuccess: Bool,
+        isAutomated: Bool
+    ) {
+        self.id = id
+        self.timestamp = timestamp
+        self.titleKey = title
+        self.titleArgs = []
+        self.detailKey = nil
+        self.detailArgs = [.string(detail)]
+        self.customDetailFormat = "%@"
+        self.isSuccess = isSuccess
+        self.isAutomated = isAutomated
+    }
+
+    /// Resolves the log title into the target language or currently active interface language
+    func localizedTitle(in language: AppLanguage? = nil) -> String {
+        if titleArgs.isEmpty {
+            return I18n.shared.localized(titleKey, in: language)
+        }
+        let resolved = titleArgs.map { $0.resolve(in: language) as CVarArg }
+        return I18n.shared.format(titleKey, in: language, args: resolved)
+    }
+
+    private static func countSpecifiers(in pattern: String) -> Int {
+        var count = 0
+        var iterator = pattern.makeIterator()
+        while let char = iterator.next() {
+            if char == "%" {
+                if let nextChar = iterator.next() {
+                    if nextChar != "%" {
+                        count += 1
+                    }
+                } else {
+                    count += 1
+                }
+            }
+        }
+        return count
+    }
+
+    /// Resolves the log detail into the target language or currently active interface language
+    func localizedDetail(in language: AppLanguage? = nil) -> String {
+        let resolvedArgs = detailArgs.map { $0.resolve(in: language) as CVarArg }
+        if let key = detailKey {
+            let template = I18n.shared.localized(key, in: language)
+            let requiredCount = Self.countSpecifiers(in: template)
+            if requiredCount == 0 {
+                return template
+            }
+            if resolvedArgs.isEmpty {
+                return ""
+            }
+            if resolvedArgs.count >= requiredCount {
+                return I18n.shared.format(key, in: language, args: resolvedArgs)
+            }
+            return resolvedArgs.map { String(describing: $0) }.joined(separator: " · ")
+        }
+        if let formatPattern = customDetailFormat {
+            let requiredCount = Self.countSpecifiers(in: formatPattern)
+            if requiredCount == 0 {
+                return formatPattern
+            }
+            if resolvedArgs.isEmpty {
+                return ""
+            }
+            if resolvedArgs.count >= requiredCount {
+                return String(format: formatPattern, arguments: resolvedArgs)
+            }
+            return resolvedArgs.map { String(describing: $0) }.joined(separator: " — ")
+        }
+        return resolvedArgs.map { String(describing: $0) }.joined(separator: " ")
+    }
+
+    var title: String {
+        localizedTitle()
+    }
+
+    var detail: String {
+        localizedDetail()
+    }
+
+    private static let timeFormatterLock = NSLock()
+    private static let timeFormatter: DateFormatter = {
         let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
         formatter.dateFormat = "HH:mm:ss"
-        return formatter.string(from: timestamp)
+        return formatter
+    }()
+
+    var formattedTime: String {
+        Self.timeFormatterLock.lock()
+        defer { Self.timeFormatterLock.unlock() }
+        return Self.timeFormatter.string(from: timestamp)
     }
 }

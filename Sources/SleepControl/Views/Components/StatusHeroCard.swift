@@ -451,7 +451,7 @@ struct StatusHeroCard: View {
                             Toggle("", isOn: Binding(
                                 get: { controller.isSleepDisabled },
                                 set: { newValue in
-                                    controller.setSleepDisabled(newValue, isAutomated: false, reason: L("msg.reason.hero_switch"))
+                                    controller.setSleepDisabled(newValue, isAutomated: false, reasonKey: "msg.reason.hero_switch")
                                 }
                             ))
                             .toggleStyle(.switch)

@@ -33,9 +33,8 @@ final class AppController: ObservableObject {
 
     /// Active interface language (defaults to system `.system`, falls back to `.en`)
     @Published var appLanguage: AppLanguage {
-        didSet {
-            I18n.shared.setLanguage(appLanguage)
-            objectWillChange.send()
+        willSet {
+            I18n.shared.setLanguage(newValue)
         }
     }
 
@@ -81,7 +80,7 @@ final class AppController: ObservableObject {
 
         // Align sleep state with power source on app launch if enabled and passwordless auth is ready
         if autoDisableOnAC && isPasswordlessConfigured {
-            reconcileSleepWithCurrentPower(reason: L("msg.reason.startup_sync"))
+            reconcileSleepWithCurrentPower(reasonKey: "msg.reason.startup_sync")
         }
     }
 
@@ -110,15 +109,7 @@ final class AppController: ObservableObject {
 
         if isInitial {
             self.lastPowerSource = currentPower.source
-            let stateText = currentTelemetry.isSleepDisabled
-                ? L("telemetry.val.disabled")
-                : L("telemetry.val.enabled")
-            appendLog(
-                title: L("msg.ready.title"),
-                detail: LF("msg.ready.detail", stateText, currentPower.formattedSummary),
-                isSuccess: true,
-                isAutomated: true
-            )
+            logReady(isSleepDisabled: currentTelemetry.isSleepDisabled, powerSnapshot: currentPower)
         }
     }
 
@@ -132,15 +123,7 @@ final class AppController: ObservableObject {
             withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
                 self.isSleepDisabled = latest.isSleepDisabled
             }
-            let stateText = latest.isSleepDisabled
-                ? L("telemetry.val.disabled")
-                : L("telemetry.val.enabled")
-            appendLog(
-                title: L("msg.external_change.title"),
-                detail: LF("msg.external_change.detail", stateText),
-                isSuccess: true,
-                isAutomated: true
-            )
+            logExternalChange(isSleepDisabled: latest.isSleepDisabled)
         }
         self.telemetry = latest
         self.powerSnapshot = latestPower
@@ -150,10 +133,10 @@ final class AppController: ObservableObject {
     // MARK: - Manual Sleep Toggling
 
     func toggleSleepDisabled() {
-        setSleepDisabled(!isSleepDisabled, isAutomated: false, reason: L("msg.reason.manual"))
+        setSleepDisabled(!isSleepDisabled, isAutomated: false, reasonKey: "msg.reason.manual")
     }
 
-    func setSleepDisabled(_ targetDisable: Bool, isAutomated: Bool, reason: String) {
+    func setSleepDisabled(_ targetDisable: Bool, isAutomated: Bool, reasonKey: String) {
         guard !isBusy else { return }
         isBusy = true
         clearBanner()
@@ -177,28 +160,21 @@ final class AppController: ObservableObject {
 
                 switch result {
                 case .success:
-                    let actionDesc = targetDisable ? L("msg.toggle.disabled") : L("msg.toggle.enabled")
-                    self.appendLog(
-                        title: actionDesc,
-                        detail: LF("msg.toggle.source", reason),
-                        isSuccess: true,
-                        isAutomated: isAutomated
-                    )
+                    self.logToggleSuccess(targetDisable: targetDisable, reasonKey: reasonKey, isAutomated: isAutomated)
                 case .failure(let error):
                     if case SleepControlError.userCanceledAuth = error {
                         self.showBanner(L("msg.auth.canceled"), isError: false)
                     } else {
                         self.showBanner(error.localizedDescription, isError: true)
                     }
-                    self.appendLog(
-                        title: L("msg.toggle.failed"),
-                        detail: "\(reason) — \(error.localizedDescription)",
-                        isSuccess: false,
-                        isAutomated: isAutomated
-                    )
+                    self.logToggleFailure(reasonKey: reasonKey, error: error, isAutomated: isAutomated)
                 }
             }
         }
+    }
+
+    func setSleepDisabled(_ targetDisable: Bool, isAutomated: Bool, reason: String) {
+        setSleepDisabled(targetDisable, isAutomated: isAutomated, reasonKey: reason)
     }
 
     // MARK: - Power Transition Handling
@@ -214,51 +190,36 @@ final class AppController: ObservableObject {
             return
         }
 
-        let sourceEventTitle = (newSnapshot.source == .ac)
-            ? L("msg.power.ac_connected")
-            : L("msg.power.battery_switched")
-        appendLog(
-            title: sourceEventTitle,
-            detail: newSnapshot.formattedSummary,
-            isSuccess: true,
-            isAutomated: true
-        )
+        let sourceEventKey = (newSnapshot.source == .ac)
+            ? "msg.power.ac_connected"
+            : "msg.power.battery_switched"
+        logPowerTransition(newSnapshot: newSnapshot)
 
         guard autoDisableOnAC else { return }
-        let companionBanner = (newSnapshot.source == .ac)
-            ? L("msg.power.ac_companion_banner")
-            : L("msg.power.battery_companion_banner")
-        showBanner(companionBanner, isError: false)
-        reconcileSleepWithCurrentPower(reason: sourceEventTitle)
+        let companionBannerKey = (newSnapshot.source == .ac)
+            ? "msg.power.ac_companion_banner"
+            : "msg.power.battery_companion_banner"
+        showBanner(L(companionBannerKey), isError: false)
+        reconcileSleepWithCurrentPower(reasonKey: sourceEventKey)
     }
 
     private func handleAutoDisableSettingChanged() {
         if autoDisableOnAC {
-            appendLog(
-                title: L("msg.auto.turned_on.title"),
-                detail: L("msg.auto.turned_on.detail"),
-                isSuccess: true,
-                isAutomated: false
-            )
-            reconcileSleepWithCurrentPower(reason: L("msg.reason.auto_enabled"))
+            logAutoDisableChanged(enabled: true)
+            reconcileSleepWithCurrentPower(reasonKey: "msg.reason.auto_enabled")
         } else {
-            appendLog(
-                title: L("msg.auto.turned_off.title"),
-                detail: L("msg.auto.turned_off.detail"),
-                isSuccess: true,
-                isAutomated: false
-            )
+            logAutoDisableChanged(enabled: false)
         }
     }
 
     /// Aligns `disablesleep` state according to current power source
-    private func reconcileSleepWithCurrentPower(reason: String) {
+    private func reconcileSleepWithCurrentPower(reasonKey: String) {
         let currentSource = powerSnapshot.source
         guard currentSource == .ac || currentSource == .battery else { return }
 
         let shouldDisableSleep = (currentSource == .ac)
         if isSleepDisabled != shouldDisableSleep {
-            setSleepDisabled(shouldDisableSleep, isAutomated: true, reason: reason)
+            setSleepDisabled(shouldDisableSleep, isAutomated: true, reasonKey: reasonKey)
         }
     }
 
@@ -284,14 +245,9 @@ final class AppController: ObservableObject {
                 switch result {
                 case .success:
                     self.showBanner(L("msg.auth.enabled.banner"), isError: false)
-                    self.appendLog(
-                        title: L("msg.auth.enabled.title"),
-                        detail: L("msg.auth.enabled.detail"),
-                        isSuccess: true,
-                        isAutomated: false
-                    )
+                    self.logPasswordlessAuthChanged(enabled: true)
                     if self.autoDisableOnAC {
-                        self.reconcileSleepWithCurrentPower(reason: L("msg.reason.auth_done_sync"))
+                        self.reconcileSleepWithCurrentPower(reasonKey: "msg.reason.auth_done_sync")
                     }
                 case .failure(let error):
                     if case SleepControlError.userCanceledAuth = error {
@@ -322,12 +278,7 @@ final class AppController: ObservableObject {
                 }
                 if case .success = result {
                     self.showBanner(L("msg.auth.revoked.banner"), isError: false)
-                    self.appendLog(
-                        title: L("msg.auth.revoked.title"),
-                        detail: L("msg.auth.revoked.detail"),
-                        isSuccess: true,
-                        isAutomated: false
-                    )
+                    self.logPasswordlessAuthChanged(enabled: false)
                 }
             }
         }
@@ -343,12 +294,7 @@ final class AppController: ObservableObject {
                 try SMAppService.mainApp.register()
             }
             launchAtLoginEnabled = (SMAppService.mainApp.status == .enabled)
-            appendLog(
-                title: launchAtLoginEnabled ? L("msg.launch.on") : L("msg.launch.off"),
-                detail: L("msg.launch.detail"),
-                isSuccess: true,
-                isAutomated: false
-            )
+            logLaunchAtLoginChanged(enabled: launchAtLoginEnabled)
         } catch {
             showBanner(LF("msg.launch.error", error.localizedDescription), isError: true)
         }
@@ -400,7 +346,26 @@ final class AppController: ObservableObject {
         }
     }
 
-    private func appendLog(title: String, detail: String, isSuccess: Bool, isAutomated: Bool) {
+    // MARK: - Activity Log Semantic Logging & Retention
+
+    static let maxLogCount: Int = 30
+    static let maxLogAgeSeconds: TimeInterval = 30 * 24 * 60 * 60 // 30 days
+
+    /// Enforces retention policy: prunes items older than 30 days or exceeding 30 entries
+    func pruneLogs(referenceDate: Date = Date()) {
+        let cutoff = referenceDate.addingTimeInterval(-Self.maxLogAgeSeconds)
+        activityLogs.removeAll { $0.timestamp < cutoff }
+        if activityLogs.count > Self.maxLogCount {
+            activityLogs.removeLast(activityLogs.count - Self.maxLogCount)
+        }
+    }
+
+    func appendLog(_ item: ActivityLogItem) {
+        activityLogs.insert(item, at: 0)
+        pruneLogs(referenceDate: Date())
+    }
+
+    func appendLog(title: String, detail: String, isSuccess: Bool, isAutomated: Bool) {
         let item = ActivityLogItem(
             timestamp: Date(),
             title: title,
@@ -408,9 +373,124 @@ final class AppController: ObservableObject {
             isSuccess: isSuccess,
             isAutomated: isAutomated
         )
-        self.activityLogs.insert(item, at: 0)
-        if self.activityLogs.count > 30 {
-            self.activityLogs.removeLast(self.activityLogs.count - 30)
+        appendLog(item)
+    }
+
+    func logReady(isSleepDisabled: Bool, powerSnapshot: PowerSnapshot) {
+        appendLog(ActivityLogItem(
+            timestamp: Date(),
+            titleKey: "msg.ready.title",
+            titleArgs: [],
+            detailKey: "msg.ready.detail",
+            detailArgs: [
+                .sleepState(isSleepDisabled: isSleepDisabled),
+                .powerSnapshot(powerSnapshot)
+            ],
+            isSuccess: true,
+            isAutomated: true
+        ))
+    }
+
+    func logExternalChange(isSleepDisabled: Bool) {
+        appendLog(ActivityLogItem(
+            timestamp: Date(),
+            titleKey: "msg.external_change.title",
+            titleArgs: [],
+            detailKey: "msg.external_change.detail",
+            detailArgs: [
+                .sleepState(isSleepDisabled: isSleepDisabled)
+            ],
+            isSuccess: true,
+            isAutomated: true
+        ))
+    }
+
+    func logToggleSuccess(targetDisable: Bool, reasonKey: String, isAutomated: Bool) {
+        let titleKey = targetDisable ? "msg.toggle.disabled" : "msg.toggle.enabled"
+        appendLog(ActivityLogItem(
+            timestamp: Date(),
+            titleKey: titleKey,
+            titleArgs: [],
+            detailKey: "msg.toggle.source",
+            detailArgs: [.localizedKey(reasonKey)],
+            isSuccess: true,
+            isAutomated: isAutomated
+        ))
+    }
+
+    func logToggleFailure(reasonKey: String, error: Error, isAutomated: Bool) {
+        let errorParam: ActivityLogParameter
+        if let scErr = error as? SleepControlError {
+            errorParam = .error(scErr)
+        } else {
+            errorParam = .string(error.localizedDescription)
         }
+        appendLog(ActivityLogItem(
+            timestamp: Date(),
+            titleKey: "msg.toggle.failed",
+            titleArgs: [],
+            detailKey: nil,
+            detailArgs: [.localizedKey(reasonKey), errorParam],
+            customDetailFormat: "%@ — %@",
+            isSuccess: false,
+            isAutomated: isAutomated
+        ))
+    }
+
+    func logPowerTransition(newSnapshot: PowerSnapshot) {
+        let titleKey = (newSnapshot.source == .ac)
+            ? "msg.power.ac_connected"
+            : "msg.power.battery_switched"
+        appendLog(ActivityLogItem(
+            timestamp: Date(),
+            titleKey: titleKey,
+            titleArgs: [],
+            detailKey: nil,
+            detailArgs: [.powerSnapshot(newSnapshot)],
+            customDetailFormat: "%@",
+            isSuccess: true,
+            isAutomated: true
+        ))
+    }
+
+    func logAutoDisableChanged(enabled: Bool) {
+        let titleKey = enabled ? "msg.auto.turned_on.title" : "msg.auto.turned_off.title"
+        let detailKey = enabled ? "msg.auto.turned_on.detail" : "msg.auto.turned_off.detail"
+        appendLog(ActivityLogItem(
+            timestamp: Date(),
+            titleKey: titleKey,
+            titleArgs: [],
+            detailKey: detailKey,
+            detailArgs: [],
+            isSuccess: true,
+            isAutomated: false
+        ))
+    }
+
+    func logPasswordlessAuthChanged(enabled: Bool) {
+        let titleKey = enabled ? "msg.auth.enabled.title" : "msg.auth.revoked.title"
+        let detailKey = enabled ? "msg.auth.enabled.detail" : "msg.auth.revoked.detail"
+        appendLog(ActivityLogItem(
+            timestamp: Date(),
+            titleKey: titleKey,
+            titleArgs: [],
+            detailKey: detailKey,
+            detailArgs: [],
+            isSuccess: true,
+            isAutomated: false
+        ))
+    }
+
+    func logLaunchAtLoginChanged(enabled: Bool) {
+        let titleKey = enabled ? "msg.launch.on" : "msg.launch.off"
+        appendLog(ActivityLogItem(
+            timestamp: Date(),
+            titleKey: titleKey,
+            titleArgs: [],
+            detailKey: "msg.launch.detail",
+            detailArgs: [],
+            isSuccess: true,
+            isAutomated: false
+        ))
     }
 }

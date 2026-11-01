@@ -1,7 +1,7 @@
 import Foundation
 
 /// Manages reading and modifying macOS `pmset` sleep configuration and managing `/etc/sudoers.d/mac_sleep_control`
-final class SleepManager {
+final class SleepManager: @unchecked Sendable {
     static let shared = SleepManager()
     private let sudoersFilePath = "/etc/sudoers.d/mac_sleep_control"
 
@@ -148,27 +148,37 @@ final class SleepManager {
             if msg.contains("-128") || msg.localizedCaseInsensitiveContains("User canceled") {
                 return .failure(SleepControlError.userCanceledAuth)
             }
-            return .failure(SleepControlError.executionFailed(msg.isEmpty ? LF("err.exec_failed", result.exitCode) : msg))
+            if msg.isEmpty {
+                return .failure(SleepControlError.executionFailedWithCode(result.exitCode))
+            }
+            return .failure(SleepControlError.executionFailed(msg))
         }
     }
 }
 
-enum SleepControlError: LocalizedError {
+enum SleepControlError: LocalizedError, Equatable {
     case passwordlessNotConfigured
     case userCanceledAuth
     case invalidUsername(String)
     case executionFailed(String)
+    case executionFailedWithCode(Int32)
 
     var errorDescription: String? {
+        localizedErrorDescription(in: nil)
+    }
+
+    func localizedErrorDescription(in language: AppLanguage? = nil) -> String {
         switch self {
         case .passwordlessNotConfigured:
-            return L("err.passwordless_not_configured")
+            return I18n.shared.localized("err.passwordless_not_configured", in: language)
         case .userCanceledAuth:
-            return L("err.user_canceled")
+            return I18n.shared.localized("err.user_canceled", in: language)
         case .invalidUsername(let name):
-            return LF("err.invalid_username", name)
+            return I18n.shared.format("err.invalid_username", in: language, args: [name])
         case .executionFailed(let detail):
             return detail
+        case .executionFailedWithCode(let code):
+            return I18n.shared.format("err.exec_failed", in: language, args: [code])
         }
     }
 }
