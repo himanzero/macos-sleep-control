@@ -31,6 +31,16 @@ final class AppController: ObservableObject {
     /// Transient floating heart badge when user pets the companion cat
     @Published private(set) var showPetHeart: Bool = false
 
+    /// Current application version string (e.g. "1.1.2")
+    var appVersionString: String {
+        AppVersion.raw()
+    }
+
+    /// Formatted version string of the application with 'v' prefix (e.g. "v1.1.2")
+    var appVersionDisplayString: String {
+        AppVersion.formatted()
+    }
+
     /// Active interface language (defaults to system `.system`, falls back to `.en`)
     @Published var appLanguage: AppLanguage {
         willSet {

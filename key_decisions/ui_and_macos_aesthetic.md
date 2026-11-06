@@ -38,3 +38,13 @@
   - **Living Micro-Animations via `TimelineView`**: Used `TimelineView(.animation)` sine-wave modulation to drive continuous breathing scale/elevation, outer halo pulsing, floating `"z Z"` sleep particles + twinkling stars when sleep is allowed, and golden sparkles when keeping the Mac awake.
   - **Interactive Petting & Companion Speech Bubble**: Clicking the cat stage or the companion speech bubble triggers `AppController.petCompanion()`, bouncing the cat with a spring animation, popping a floating heart badge, and cycling localized 1st-person companion quotes across all 5 supported languages.
   - **Multi-Layer Aurora Ambient Backdrop**: Added `AuroraAmbientBackdrop` with drifting radial color orbs (warm golden-coral sunrise when awake; midnight indigo-violet nebula when sleeping) to both `MainWindowView` and `MenuBarPopoverView`.
+
+## Decision 6: Dashboard Version Display Hierarchy & In-Flow Footer Placement
+- **Status**: Accepted
+- **Context**: Users and testers need a clear visual indicator of the installed application version to verify updates and report issues. The indicator must sit in the empty bottom-left region of the dashboard without competing with primary action controls or obscuring Bento cards when the window is resized.
+- **Decision Outcome**:
+  - **In-Flow Footer Placement**: Placed `dashboardFooterSection` as the terminal child in `ScrollView > VStack` rather than an absolute overlay or floating safe-area inset. This ensures that when the window is resized to minimum dimensions (`minHeight: 750`), content scrolls naturally without cards slipping behind a floating label.
+  - **Tertiary Typography Scale**: Styled with `.system(size: 11, weight: .regular, design: .monospaced)` and `.foregroundStyle(.tertiary)`, aligning with low-level command metadata and timeline timestamps.
+  - **Non-Interactive & Window Drag Pass-Through**: Applied `.allowsHitTesting(false)` so clicks and drags pass through to the underlying window background (`window.isMovableByWindowBackground = true`), preventing accidental text selection or drag interruptions.
+  - **Multi-Tiered Version Resolution**: Created `AppVersion` service resolving `CFBundleShortVersionString` dynamically from the main bundle, falling back to local dev bundle inspection, and finally to a static release fallback.
+  - **Universal i18n Format**: Added `"dashboard.version" = "v%@";` across all 5 supported `.lproj` catalogs.

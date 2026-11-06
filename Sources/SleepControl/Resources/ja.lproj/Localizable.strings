@@ -4,6 +4,7 @@
 "window.main.title" = "SleepControl コントロールセンター";
 "window.main.badge" = "macOS 電源 & クラムシェル・スリープ防止";
 "window.main.subtitle" = "pmset disablesleep を視覚的に管理し、電源接続時の自動スリープ防止や閉じたままの稼働をサポートします";
+"dashboard.version" = "v%@";
 
 /* Menu Bar Label */
 "menubar.status.awake" = "常時稼働";

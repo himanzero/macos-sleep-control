@@ -11,7 +11,7 @@ struct MainWindowView: View {
             AuroraAmbientBackdrop(isSleepDisabled: controller.isSleepDisabled, intensity: 1.0)
 
             ScrollView {
-                VStack(alignment: .leading, spacing: 18) {
+                VStack(alignment: .leading, spacing: 16) {
                     // Header title, language switcher, and toolbar actions
                     headerSection
 
@@ -42,6 +42,9 @@ struct MainWindowView: View {
                             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                     }
                     .fixedSize(horizontal: false, vertical: true)
+
+                    // 4. Bottom-Left Version Display
+                    dashboardFooterSection
                 }
                 .padding(24)
             }
@@ -444,5 +447,20 @@ struct MainWindowView: View {
                 }
             }
         }
+    }
+
+    // MARK: - Dashboard Footer Section
+
+    private var dashboardFooterSection: some View {
+        HStack {
+            Text(LF("dashboard.version", AppVersion.raw()))
+                .font(.system(size: 11, weight: .regular, design: .monospaced))
+                .foregroundStyle(.tertiary)
+                .lineLimit(1)
+                .allowsHitTesting(false)
+
+            Spacer()
+        }
+        .padding(.top, -6)
     }
 }

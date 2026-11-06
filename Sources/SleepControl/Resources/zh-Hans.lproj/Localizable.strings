@@ -4,6 +4,7 @@
 "window.main.title" = "SleepControl 控制中心";
 "window.main.badge" = "macOS 电源与合盖防休眠卫士";
 "window.main.subtitle" = "可视化管控 pmset disablesleep，支持接入电源自动防休眠与合盖常亮运行";
+"dashboard.version" = "v%@";
 
 /* Menu Bar Label */
 "menubar.status.awake" = "常亮";

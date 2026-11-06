@@ -14,7 +14,7 @@ enum ScreenshotExporter {
         controller.selectLanguage(.en)
         exportWindowSnapshot(
             rootView: MainWindowView(controller: controller).environment(\.colorScheme, .dark),
-            size: NSSize(width: 850, height: 875),
+            size: NSSize(width: 850, height: 920),
             to: "\(directoryPath)/dashboard_en.png"
         )
         exportWindowSnapshot(
@@ -29,7 +29,7 @@ enum ScreenshotExporter {
         controller.selectLanguage(.zhHans)
         exportWindowSnapshot(
             rootView: MainWindowView(controller: controller).environment(\.colorScheme, .dark),
-            size: NSSize(width: 850, height: 875),
+            size: NSSize(width: 850, height: 920),
             to: "\(directoryPath)/dashboard_zh.png"
         )
         exportWindowSnapshot(

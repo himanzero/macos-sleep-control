@@ -4,6 +4,7 @@
 "window.main.title" = "SleepControl Dashboard";
 "window.main.badge" = "macOS Power & Clamshell Guard";
 "window.main.subtitle" = "Visually manage pmset disablesleep with smart AC power automation and clamshell keep-awake";
+"dashboard.version" = "v%@";
 
 /* Menu Bar Label */
 "menubar.status.awake" = "Awake";

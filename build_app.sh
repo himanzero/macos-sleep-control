@@ -7,6 +7,22 @@ APP_NAME="SleepControl"
 APP_BUNDLE="${APP_NAME}.app"
 BUILD_DIR=".build/release"
 
+# Dynamically resolve marketing version from git tag or environment
+GIT_TAG="$(git describe --tags --abbrev=0 2>/dev/null || true)"
+if [[ -n "${APP_VERSION:-}" ]]; then
+    VERSION_STRING="${APP_VERSION#v}"
+elif [[ -n "${GIT_TAG}" ]]; then
+    VERSION_STRING="${GIT_TAG#v}"
+else
+    VERSION_STRING="1.1.2"
+fi
+
+# Resolve build number from commit count or environment
+COMMIT_COUNT="$(git rev-list --count HEAD 2>/dev/null || true)"
+BUILD_NUMBER="${BUILD_NUMBER:-${COMMIT_COUNT:-4}}"
+
+echo "ℹ️  Resolved target version: ${VERSION_STRING} (build ${BUILD_NUMBER})"
+
 echo "🔨 [1/4] Building ${APP_NAME} (Release)..."
 swift build -c release -Xswiftc -nonlib-dependency-scanner
 
@@ -65,9 +81,9 @@ cat > "${APP_BUNDLE}/Contents/Info.plist" <<EOF
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleShortVersionString</key>
-    <string>1.1.2</string>
+    <string>${VERSION_STRING}</string>
     <key>CFBundleVersion</key>
-    <string>4</string>
+    <string>${BUILD_NUMBER}</string>
     <key>LSMinimumSystemVersion</key>
     <string>14.0</string>
     <key>NSHighResolutionCapable</key>
