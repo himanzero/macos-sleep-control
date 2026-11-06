@@ -115,10 +115,13 @@
 "msg.reason.manual" = "手動切換開關";
 "msg.reason.hero_switch" = "主畫面手動開關";
 "msg.reason.startup_sync" = "應用啟動 · 電源聯動同步";
+"msg.reason.startup_battery_recovery" = "應用啟動 · 電池狀態休眠恢復";
 "msg.reason.auto_enabled" = "開啟電源智能聯動";
 "msg.reason.auth_done_sync" = "免密設定完成 · 自動同步電源狀態";
 "msg.power.ac_connected" = "偵測到接駁交流電源 (AC)";
 "msg.power.battery_switched" = "偵測到切換為電池供電";
+"msg.power.clamshell_sleep.title" = "合蓋休眠已觸發";
+"msg.power.clamshell_sleep.detail" = "切換為電池供電且處於合蓋狀態，已立即執行系統休眠";
 "msg.power.ac_companion_banner" = "⚡️ 偵測到接駁電源，小貓已精神百倍進入守候狀態！";
 "msg.power.battery_companion_banner" = "🌙 已切換為電池供電，小貓正陪 Mac 一齊打盹慳電啦~";
 "msg.auto.turned_on.title" = "已開啟「接駁電源自動禁止休眠」";

@@ -38,6 +38,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         return true
     }
 
+    func applicationWillTerminate(_ notification: Notification) {
+        // Synchronously restore normal sleep capability if terminating while sleep is disabled
+        let controller = AppController.shared
+        if controller.isSleepDisabled && controller.isPasswordlessConfigured {
+            _ = SleepManager.shared.setSleepDisabled(false, allowInteractiveAuth: false)
+        }
+    }
+
     /// Configures standard macOS application and window menus (supporting Cmd+W, Cmd+0, Cmd+Q)
     private func setupMainMenu() {
         let mainMenu = NSMenu()

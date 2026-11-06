@@ -164,6 +164,7 @@ final class StatusItemManager: NSObject, NSWindowDelegate {
     func showMainWindow() {
         closePopover()
         NSApp.setActivationPolicy(.regular)
+        controller?.refreshPasswordlessStatus()
 
         if mainWindow == nil, let controller = self.controller {
             let hostingController = NSHostingController(rootView: MainWindowView(controller: controller))
@@ -256,6 +257,7 @@ final class StatusItemManager: NSObject, NSWindowDelegate {
 
     /// Positions the control panel below the status bar item while clamping strictly within the screen's visible boundaries
     private func showStatusPanel(relativeTo button: NSStatusBarButton) {
+        controller?.refreshPasswordlessStatus()
         guard let panel = statusPanel, let hostingView = panelHostingView else { return }
 
         hostingView.layoutSubtreeIfNeeded()

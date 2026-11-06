@@ -50,8 +50,7 @@ final class AppController: ObservableObject {
 
     private static let autoDisableKey = "com.himanzero.SleepControl.autoDisableOnAC"
     private let sleepManager = SleepManager.shared
-    private let powerMonitor = PowerMonitor()
-    private var refreshTimer: Timer?
+    let powerMonitor = PowerMonitor()
     private var lastPowerSource: PowerSourceKind = .unknown
     private var isInitializing: Bool = true
 
@@ -71,17 +70,24 @@ final class AppController: ObservableObject {
             }
         }
 
-        // Periodic telemetry synchronization (every 4 seconds) to detect CLI script changes
-        refreshTimer = Timer.scheduledTimer(withTimeInterval: 4.0, repeats: true) { [weak self] _ in
-            Task { @MainActor [weak self] in
-                self?.silentSyncTelemetry()
-            }
-        }
+        // Zero-polling Darwin notification observer for pmset preference changes
+        setupPreferenceChangeObserver()
 
-        // Align sleep state with power source on app launch if enabled and passwordless auth is ready
-        if autoDisableOnAC && isPasswordlessConfigured {
+        // Startup recovery: If starting on battery and sleep is disabled (e.g. lingering from previous session/crash),
+        // immediately restore disablesleep 0.
+        if powerSnapshot.source == .battery && isSleepDisabled {
+            Task { @MainActor [weak self] in
+                _ = await self?.setSleepDisabledAsync(false, reasonKey: "msg.reason.startup_battery_recovery", isAutomated: true)
+            }
+        } else if autoDisableOnAC && isPasswordlessConfigured {
+            // Align sleep state with power source on app launch if enabled and passwordless auth is ready
             reconcileSleepWithCurrentPower(reasonKey: "msg.reason.startup_sync")
         }
+    }
+
+    deinit {
+        let notifyCenter = CFNotificationCenterGetDarwinNotifyCenter()
+        CFNotificationCenterRemoveEveryObserver(notifyCenter, Unmanaged.passUnretained(self).toOpaque())
     }
 
     // MARK: - Language Switching
@@ -113,11 +119,31 @@ final class AppController: ObservableObject {
         }
     }
 
-    private func silentSyncTelemetry() {
+    private func setupPreferenceChangeObserver() {
+        let notifyCenter = CFNotificationCenterGetDarwinNotifyCenter()
+        let observer = Unmanaged.passUnretained(self).toOpaque()
+
+        CFNotificationCenterAddObserver(
+            notifyCenter,
+            observer,
+            { _, observer, name, _, _ in
+                guard let observer = observer else { return }
+                let controller = Unmanaged<AppController>.fromOpaque(observer).takeUnretainedValue()
+                DispatchQueue.main.async {
+                    controller.refreshTelemetryOnly()
+                }
+            },
+            "com.apple.powermanagement.preferencechanged" as CFString,
+            nil,
+            .deliverImmediately
+        )
+    }
+
+    /// Lightweight telemetry synchronization triggered by Darwin notifications (reads pmset -g without sudo)
+    func refreshTelemetryOnly() {
         guard !isBusy else { return }
         let latest = sleepManager.fetchTelemetry()
         let latestPower = powerMonitor.readCurrentPowerSnapshot()
-        let passwordless = sleepManager.isPasswordlessSudoEnabled()
 
         if latest.isSleepDisabled != self.isSleepDisabled {
             withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
@@ -127,49 +153,80 @@ final class AppController: ObservableObject {
         }
         self.telemetry = latest
         self.powerSnapshot = latestPower
-        self.isPasswordlessConfigured = passwordless
     }
 
-    // MARK: - Manual Sleep Toggling
+    private func silentSyncTelemetry() {
+        refreshTelemetryOnly()
+    }
+
+    /// Refreshes passwordless sudoers authorization status on-demand (e.g. when opening UI)
+    func refreshPasswordlessStatus() {
+        let manager = self.sleepManager
+        Task.detached(priority: .userInitiated) {
+            let passwordless = manager.isPasswordlessSudoEnabled()
+            await MainActor.run { [weak self] in
+                guard let self = self else { return }
+                if self.isPasswordlessConfigured != passwordless {
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                        self.isPasswordlessConfigured = passwordless
+                    }
+                }
+            }
+        }
+    }
+
+    // MARK: - Manual & Automated Sleep Toggling
 
     func toggleSleepDisabled() {
         setSleepDisabled(!isSleepDisabled, isAutomated: false, reasonKey: "msg.reason.manual")
     }
 
-    func setSleepDisabled(_ targetDisable: Bool, isAutomated: Bool, reasonKey: String) {
-        guard !isBusy else { return }
+    /// Executes disablesleep toggle asynchronously and returns true upon successful completion
+    @discardableResult
+    func setSleepDisabledAsync(_ targetDisable: Bool, reasonKey: String, isAutomated: Bool = true) async -> Bool {
+        var attempts = 0
+        while isBusy && attempts < 40 {
+            attempts += 1
+            try? await Task.sleep(nanoseconds: 50_000_000)
+        }
         isBusy = true
+        defer { isBusy = false }
         clearBanner()
 
         let allowInteractive = !isAutomated || isPasswordlessConfigured
         let manager = self.sleepManager
 
-        Task.detached(priority: .userInitiated) {
-            let result = manager.setSleepDisabled(targetDisable, allowInteractiveAuth: allowInteractive)
-            let updatedTelemetry = manager.fetchTelemetry()
-            let passwordless = manager.isPasswordlessSudoEnabled()
+        let result = await Task.detached(priority: .userInitiated) {
+            manager.setSleepDisabled(targetDisable, allowInteractiveAuth: allowInteractive)
+        }.value
 
-            await MainActor.run { [weak self] in
-                guard let self = self else { return }
-                self.isBusy = false
-                withAnimation(.spring(response: 0.4, dampingFraction: 0.78)) {
-                    self.telemetry = updatedTelemetry
-                    self.isSleepDisabled = updatedTelemetry.isSleepDisabled
-                    self.isPasswordlessConfigured = passwordless
-                }
+        let updatedTelemetry = manager.fetchTelemetry()
+        let passwordless = manager.isPasswordlessSudoEnabled()
 
-                switch result {
-                case .success:
-                    self.logToggleSuccess(targetDisable: targetDisable, reasonKey: reasonKey, isAutomated: isAutomated)
-                case .failure(let error):
-                    if case SleepControlError.userCanceledAuth = error {
-                        self.showBanner(L("msg.auth.canceled"), isError: false)
-                    } else {
-                        self.showBanner(error.localizedDescription, isError: true)
-                    }
-                    self.logToggleFailure(reasonKey: reasonKey, error: error, isAutomated: isAutomated)
-                }
+        withAnimation(.spring(response: 0.4, dampingFraction: 0.78)) {
+            self.telemetry = updatedTelemetry
+            self.isSleepDisabled = updatedTelemetry.isSleepDisabled
+            self.isPasswordlessConfigured = passwordless
+        }
+
+        switch result {
+        case .success:
+            self.logToggleSuccess(targetDisable: targetDisable, reasonKey: reasonKey, isAutomated: isAutomated)
+            return true
+        case .failure(let error):
+            if case SleepControlError.userCanceledAuth = error {
+                self.showBanner(L("msg.auth.canceled"), isError: false)
+            } else {
+                self.showBanner(error.localizedDescription, isError: true)
             }
+            self.logToggleFailure(reasonKey: reasonKey, error: error, isAutomated: isAutomated)
+            return false
+        }
+    }
+
+    func setSleepDisabled(_ targetDisable: Bool, isAutomated: Bool, reasonKey: String) {
+        Task { @MainActor [weak self] in
+            _ = await self?.setSleepDisabledAsync(targetDisable, reasonKey: reasonKey, isAutomated: isAutomated)
         }
     }
 
@@ -190,9 +247,6 @@ final class AppController: ObservableObject {
             return
         }
 
-        let sourceEventKey = (newSnapshot.source == .ac)
-            ? "msg.power.ac_connected"
-            : "msg.power.battery_switched"
         logPowerTransition(newSnapshot: newSnapshot)
 
         guard autoDisableOnAC else { return }
@@ -200,7 +254,29 @@ final class AppController: ObservableObject {
             ? "msg.power.ac_companion_banner"
             : "msg.power.battery_companion_banner"
         showBanner(L(companionBannerKey), isError: false)
-        reconcileSleepWithCurrentPower(reasonKey: sourceEventKey)
+
+        Task { @MainActor [weak self] in
+            guard let self = self else { return }
+
+            if previousSource == .ac && newSnapshot.source == .battery {
+                // Transition from AC to Battery:
+                // 1. Await completion of disablesleep 0 in pmset (synchronous update in kernel IOPMrootDomain)
+                let success = await self.setSleepDisabledAsync(false, reasonKey: "msg.power.battery_switched", isAutomated: true)
+                guard success else { return }
+
+                // 2. Inspect if the clamshell lid is currently closed
+                if self.powerMonitor.isClamshellClosed() {
+                    // macOS powerd missed the clamshell sleep evaluation due to the race condition.
+                    // Trigger immediate demanded sleep via IOKit.
+                    let sleepInitiated = self.powerMonitor.sleepSystemNow()
+                    if sleepInitiated {
+                        self.logClamshellSleep()
+                    }
+                }
+            } else if previousSource == .battery && newSnapshot.source == .ac {
+                _ = await self.setSleepDisabledAsync(true, reasonKey: "msg.power.ac_connected", isAutomated: true)
+            }
+        }
     }
 
     private func handleAutoDisableSettingChanged() {
@@ -219,7 +295,16 @@ final class AppController: ObservableObject {
 
         let shouldDisableSleep = (currentSource == .ac)
         if isSleepDisabled != shouldDisableSleep {
-            setSleepDisabled(shouldDisableSleep, isAutomated: true, reasonKey: reasonKey)
+            Task { @MainActor [weak self] in
+                guard let self = self else { return }
+                let success = await self.setSleepDisabledAsync(shouldDisableSleep, reasonKey: reasonKey, isAutomated: true)
+                if success && !shouldDisableSleep && self.powerMonitor.isClamshellClosed() {
+                    let sleepInitiated = self.powerMonitor.sleepSystemNow()
+                    if sleepInitiated {
+                        self.logClamshellSleep()
+                    }
+                }
+            }
         }
     }
 
@@ -491,6 +576,18 @@ final class AppController: ObservableObject {
             detailArgs: [],
             isSuccess: true,
             isAutomated: false
+        ))
+    }
+
+    func logClamshellSleep() {
+        appendLog(ActivityLogItem(
+            timestamp: Date(),
+            titleKey: "msg.power.clamshell_sleep.title",
+            titleArgs: [],
+            detailKey: "msg.power.clamshell_sleep.detail",
+            detailArgs: [],
+            isSuccess: true,
+            isAutomated: true
         ))
     }
 }

@@ -150,6 +150,40 @@ struct ActivityLogTests {
             )
             #expect(launchItem.localizedTitle(in: lang) == I18n.shared.localized("msg.launch.on", in: lang))
             #expect(launchItem.localizedDetail(in: lang) == I18n.shared.localized("msg.launch.detail", in: lang))
+
+            // 9. Clamshell sleep event
+            let clamshellItem = ActivityLogItem(
+                timestamp: Date(),
+                titleKey: "msg.power.clamshell_sleep.title",
+                titleArgs: [],
+                detailKey: "msg.power.clamshell_sleep.detail",
+                detailArgs: [],
+                isSuccess: true,
+                isAutomated: true
+            )
+            let clamshellTitle = clamshellItem.localizedTitle(in: lang)
+            let clamshellDetail = clamshellItem.localizedDetail(in: lang)
+            #expect(clamshellTitle == I18n.shared.localized("msg.power.clamshell_sleep.title", in: lang))
+            #expect(clamshellDetail == I18n.shared.localized("msg.power.clamshell_sleep.detail", in: lang))
+            #expect(!clamshellTitle.isEmpty)
+            #expect(!clamshellDetail.isEmpty)
+
+            // 10. Startup battery recovery event
+            let recoveryItem = ActivityLogItem(
+                timestamp: Date(),
+                titleKey: "msg.toggle.enabled",
+                titleArgs: [],
+                detailKey: "msg.toggle.source",
+                detailArgs: [.localizedKey("msg.reason.startup_battery_recovery")],
+                isSuccess: true,
+                isAutomated: true
+            )
+            let recoveryTitle = recoveryItem.localizedTitle(in: lang)
+            let recoveryDetail = recoveryItem.localizedDetail(in: lang)
+            #expect(recoveryTitle == I18n.shared.localized("msg.toggle.enabled", in: lang))
+            #expect(recoveryDetail.contains(I18n.shared.localized("msg.reason.startup_battery_recovery", in: lang)))
+            #expect(!recoveryTitle.isEmpty)
+            #expect(!recoveryDetail.isEmpty)
         }
     }
 
@@ -343,10 +377,13 @@ struct ActivityLogTests {
             "msg.reason.manual",
             "msg.reason.hero_switch",
             "msg.reason.startup_sync",
+            "msg.reason.startup_battery_recovery",
             "msg.reason.auto_enabled",
             "msg.reason.auth_done_sync",
             "msg.power.ac_connected",
             "msg.power.battery_switched",
+            "msg.power.clamshell_sleep.title",
+            "msg.power.clamshell_sleep.detail",
             "msg.power.ac_companion_banner",
             "msg.power.battery_companion_banner",
             "msg.auto.turned_on.title",
@@ -713,7 +750,7 @@ struct ActivityLogTests {
         #expect(controller.activityLogs.contains(where: { $0.title == "Future Log (+35d)" }))
     }
 
-    @Test("Verify all 8 activity log event types dynamically re-localize across all supported locales")
+    @Test("Verify all 9 activity log event types dynamically re-localize across all supported locales")
     @MainActor
     func testAllLogEventTypesDynamicLanguageSwitching() {
         let initialLang = I18n.shared.currentLanguage
@@ -734,8 +771,9 @@ struct ActivityLogTests {
         controller.logAutoDisableChanged(enabled: true)
         controller.logPasswordlessAuthChanged(enabled: true)
         controller.logLaunchAtLoginChanged(enabled: true)
+        controller.logClamshellSleep()
 
-        #expect(controller.activityLogs.count == 8)
+        #expect(controller.activityLogs.count == 9)
 
         for lang in supportedLanguages {
             controller.selectLanguage(lang)
@@ -744,6 +782,83 @@ struct ActivityLogTests {
                 #expect(!item.detail.isEmpty, "Empty detail in language \(lang.rawValue) for item \(item.titleKey)")
                 #expect(!item.detail.contains("(null)"), "Leaked (null) in \(lang.rawValue) for item \(item.titleKey)")
                 #expect(!item.detail.contains("%@"), "Leaked %@ in \(lang.rawValue) for item \(item.titleKey)")
+            }
+        }
+    }
+
+    // MARK: - Clamshell & Startup Battery Recovery Localization Tests
+
+    @Test("Verify clamshell sleep and startup battery recovery log items correctly localize across all 5 supported locales")
+    @MainActor
+    func testClamshellSleepAndStartupBatteryRecoveryLocalization() {
+        let initialLang = I18n.shared.currentLanguage
+        defer {
+            I18n.shared.setLanguage(initialLang)
+        }
+
+        // 1. Standalone clamshell sleep activity log item
+        let clamshellItem = ActivityLogItem(
+            timestamp: Date(),
+            titleKey: "msg.power.clamshell_sleep.title",
+            titleArgs: [],
+            detailKey: "msg.power.clamshell_sleep.detail",
+            detailArgs: [],
+            isSuccess: true,
+            isAutomated: true
+        )
+
+        // 2. Standalone startup battery recovery toggle activity log item
+        let startupRecoveryItem = ActivityLogItem(
+            timestamp: Date(),
+            titleKey: "msg.toggle.enabled",
+            titleArgs: [],
+            detailKey: "msg.toggle.source",
+            detailArgs: [.localizedKey("msg.reason.startup_battery_recovery")],
+            isSuccess: true,
+            isAutomated: true
+        )
+
+        // Verbatim expected translations across all 5 locales
+        // English (en)
+        #expect(clamshellItem.localizedTitle(in: .en) == "Clamshell Sleep Triggered")
+        #expect(clamshellItem.localizedDetail(in: .en) == "Switched to battery with lid closed; system put to sleep immediately")
+        #expect(startupRecoveryItem.localizedDetail(in: .en).contains("App launch · Battery sleep recovery"))
+
+        // Simplified Chinese (zh-Hans)
+        #expect(clamshellItem.localizedTitle(in: .zhHans) == "合盖休眠已触发")
+        #expect(clamshellItem.localizedDetail(in: .zhHans) == "切换为电池供电且处于合盖状态，已立即执行系统休眠")
+        #expect(startupRecoveryItem.localizedDetail(in: .zhHans).contains("应用启动 · 电池状态休眠恢复"))
+
+        // Traditional Chinese - Taiwan (zh-Hant-TW)
+        #expect(clamshellItem.localizedTitle(in: .zhHantTW) == "闔蓋休眠已觸發")
+        #expect(clamshellItem.localizedDetail(in: .zhHantTW) == "切換為電池供電且處於闔蓋狀態，已立即執行系統休眠")
+        #expect(startupRecoveryItem.localizedDetail(in: .zhHantTW).contains("應用啟動 · 電池狀態休眠恢復"))
+
+        // Traditional Chinese - Hong Kong (zh-Hant-HK)
+        #expect(clamshellItem.localizedTitle(in: .zhHantHK) == "合蓋休眠已觸發")
+        #expect(clamshellItem.localizedDetail(in: .zhHantHK) == "切換為電池供電且處於合蓋狀態，已立即執行系統休眠")
+        #expect(startupRecoveryItem.localizedDetail(in: .zhHantHK).contains("應用啟動 · 電池狀態休眠恢復"))
+
+        // Japanese (ja)
+        #expect(clamshellItem.localizedTitle(in: .ja) == "クラムシェルスリープ実行")
+        #expect(clamshellItem.localizedDetail(in: .ja) == "バッテリー駆動への切り替え時に画面が閉じているため、直ちにスリープを実行しました")
+        #expect(startupRecoveryItem.localizedDetail(in: .ja).contains("アプリ起動 · バッテリー状態スリープ復元"))
+
+        // 3. Dynamic hot-switching validation via AppController
+        let controller = AppController.shared
+        controller.clearLogs()
+        controller.logClamshellSleep()
+        controller.logToggleSuccess(targetDisable: false, reasonKey: "msg.reason.startup_battery_recovery", isAutomated: true)
+
+        #expect(controller.activityLogs.count == 2)
+
+        for lang in supportedLanguages {
+            controller.selectLanguage(lang)
+            for item in controller.activityLogs {
+                #expect(!item.title.isEmpty)
+                #expect(!item.detail.isEmpty)
+                #expect(!item.detail.contains("(null)"))
+                #expect(!item.detail.contains("%@"))
             }
         }
     }

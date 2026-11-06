@@ -1,5 +1,7 @@
 import Foundation
+import IOKit
 import IOKit.ps
+import IOKit.pwr_mgt
 
 /// Hardware-level real-time power source and battery monitor based on `IOKit.ps` (zero polling overhead)
 final class PowerMonitor {
@@ -117,5 +119,41 @@ final class PowerMonitor {
             snapshot.isCharged = output.contains("; charged") || output.contains("not charging")
         } catch {}
         return snapshot
+    }
+
+    // MARK: - Clamshell State & Instant Sleep
+
+    /// Inspects IOPMrootDomain to determine if the MacBook clamshell lid is physically closed
+    func isClamshellClosed() -> Bool {
+        let service = IOServiceGetMatchingService(kIOMainPortDefault, IOServiceMatching("IOPMrootDomain"))
+        guard service != 0 else { return false }
+        defer { IOObjectRelease(service) }
+
+        guard let prop = IORegistryEntryCreateCFProperty(
+            service,
+            "AppleClamshellState" as CFString,
+            kCFAllocatorDefault,
+            0
+        )?.takeRetainedValue() else {
+            return false
+        }
+        if let boolVal = prop as? Bool {
+            return boolVal
+        }
+        if let numVal = prop as? NSNumber {
+            return numVal.boolValue
+        }
+        return false
+    }
+
+    /// Triggers immediate system sleep via native IOKit without spawning subprocesses or requiring root privileges
+    @discardableResult
+    func sleepSystemNow() -> Bool {
+        let port = IOPMFindPowerManagement(kIOMainPortDefault)
+        guard port != 0 else { return false }
+        defer { IOServiceClose(port) }
+
+        let status = IOPMSleepSystem(port)
+        return status == kIOReturnSuccess
     }
 }

@@ -1,7 +1,7 @@
 ---
 name: worker
 description: A high-autonomy full-stack engineer that builds end-to-end features following our development guide and workspace rules.
-model: gemini-4-argon
+model: gemini-3.8-flash
 tools:
   - read_file
   - write_file

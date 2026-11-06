@@ -115,10 +115,13 @@
 "msg.reason.manual" = "Manual toggle";
 "msg.reason.hero_switch" = "Main switch toggle";
 "msg.reason.startup_sync" = "App launch · Power automation sync";
+"msg.reason.startup_battery_recovery" = "App launch · Battery sleep recovery";
 "msg.reason.auto_enabled" = "Smart power automation enabled";
 "msg.reason.auth_done_sync" = "Passwordless auth configured · Power sync";
 "msg.power.ac_connected" = "AC Power Connected";
 "msg.power.battery_switched" = "Switched to Battery Power";
+"msg.power.clamshell_sleep.title" = "Clamshell Sleep Triggered";
+"msg.power.clamshell_sleep.detail" = "Switched to battery with lid closed; system put to sleep immediately";
 "msg.power.ac_companion_banner" = "⚡️ AC power connected! Kitty is wide awake and guarding your Mac.";
 "msg.power.battery_companion_banner" = "🌙 On battery power — Kitty is curling up to save energy with your Mac.";
 "msg.auto.turned_on.title" = "Auto Disable Sleep on AC Enabled";

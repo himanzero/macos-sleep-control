@@ -115,10 +115,13 @@
 "msg.reason.manual" = "手動スイッチ切り替え";
 "msg.reason.hero_switch" = "メインスイッチ操作";
 "msg.reason.startup_sync" = "アプリ起動 · 電源連動同期";
+"msg.reason.startup_battery_recovery" = "アプリ起動 · バッテリー状態スリープ復元";
 "msg.reason.auto_enabled" = "スマート電源連動を有効化";
 "msg.reason.auth_done_sync" = "認証設定完了 · 電源状態と自動同期";
 "msg.power.ac_connected" = "AC電源の接続を検出";
 "msg.power.battery_switched" = "バッテリー駆動への切り替えを検出";
+"msg.power.clamshell_sleep.title" = "クラムシェルスリープ実行";
+"msg.power.clamshell_sleep.detail" = "バッテリー駆動への切り替え時に画面が閉じているため、直ちにスリープを実行しました";
 "msg.power.ac_companion_banner" = "⚡️ AC電源に接続！子猫が目を覚ましてMacの見守りを開始しましたにゃ！";
 "msg.power.battery_companion_banner" = "🌙 バッテリー駆動に切り替え。子猫もMacと一緒に省エネモードでお休み中にゃ〜";
 "msg.auto.turned_on.title" = "「電源接続時に自動スリープ禁止」を有効化";
