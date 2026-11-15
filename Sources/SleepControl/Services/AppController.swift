@@ -33,6 +33,11 @@ final class AppController: ObservableObject {
     /// Controls whether the right-side Nerd diagnostic drawer is expanded in MainWindowView
     @Published var isNerdDrawerExpanded: Bool = false
 
+    /// Overrides UI sleep state exclusively during headless screenshot export
+    func setScreenshotPreviewSleepDisabled(_ disabled: Bool) {
+        isSleepDisabled = disabled
+    }
+
     /// Current application version string (e.g. "1.1.2")
     var appVersionString: String {
         AppVersion.raw()

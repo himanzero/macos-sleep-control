@@ -17,11 +17,18 @@
 
 ## 📸 Screenshots
 
-### Editorial Cover & Diagnostic Console
-![SleepControl Editorial Window](docs/assets/dashboard_en.png)
+### Dual Editorial Covers (`Awake` & `Sleeping`)
+| Awake (`NO. 01 · KEEP AWAKE`) | Sleeping (`NO. 02 · RESTING`) |
+| :---: | :---: |
+| ![SleepControl Awake Cover](docs/assets/dashboard_en.png) | ![SleepControl Sleeping Cover](docs/assets/dashboard_sleeping_en.png) |
 
-### Menu Bar Quick Popover
-![Menu Bar Popover](docs/assets/menubar_popover_en.png)
+### Expandable Right-Side Diagnostic Console (`⌘D`)
+![SleepControl Expanded Diagnostic Console](docs/assets/dashboard_nerd_en.png)
+
+### Menu Bar Quick Popover (`Awake` & `Sleeping`)
+| Awake Popover | Sleeping Popover |
+| :---: | :---: |
+| ![Menu Bar Popover (Awake)](docs/assets/menubar_popover_en.png) | ![Menu Bar Popover (Sleeping)](docs/assets/menubar_popover_sleeping_en.png) |
 
 ---
 

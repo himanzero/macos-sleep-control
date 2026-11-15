@@ -9,47 +9,52 @@ enum ScreenshotExporter {
         try? fm.createDirectory(atPath: directoryPath, withIntermediateDirectories: true)
 
         let originalLang = controller.appLanguage
+        let originalSleepDisabled = controller.isSleepDisabled
+        let originalDrawer = controller.isNerdDrawerExpanded
 
-        // 1. Export English Editorial Main Window & Popover
+        // 1. Export English Editorial Main Window (Awake & Sleeping), Expanded Nerd Drawer, and Popovers
         controller.selectLanguage(.en)
+
+        controller.setScreenshotPreviewSleepDisabled(true)
+        controller.isNerdDrawerExpanded = false
         exportWindowSnapshot(
             rootView: MainWindowView(controller: controller),
             size: NSSize(width: 460, height: 590),
             to: "\(directoryPath)/dashboard_en.png",
-            appearance: controller.isSleepDisabled ? .aqua : .darkAqua
+            appearance: .aqua
         )
         exportWindowSnapshot(
             rootView: MenuBarPopoverView(controller: controller),
             size: NSSize(width: 340, height: 420),
             to: "\(directoryPath)/menubar_popover_en.png",
-            appearance: controller.isSleepDisabled ? .aqua : .darkAqua
-        )
-
-        // 2. Export Simplified Chinese Editorial Main Window, Popover & Expanded Nerd Drawer
-        controller.selectLanguage(.zhHans)
-        controller.isNerdDrawerExpanded = false
-        exportWindowSnapshot(
-            rootView: MainWindowView(controller: controller),
-            size: NSSize(width: 460, height: 590),
-            to: "\(directoryPath)/dashboard_zh.png",
-            appearance: controller.isSleepDisabled ? .aqua : .darkAqua
-        )
-        exportWindowSnapshot(
-            rootView: MenuBarPopoverView(controller: controller),
-            size: NSSize(width: 340, height: 420),
-            to: "\(directoryPath)/menubar_popover_zh.png",
-            appearance: controller.isSleepDisabled ? .aqua : .darkAqua
+            appearance: .aqua
         )
         controller.isNerdDrawerExpanded = true
         exportWindowSnapshot(
             rootView: MainWindowView(controller: controller),
             size: NSSize(width: 980, height: 590),
-            to: "\(directoryPath)/nerd_drawer_zh.png",
-            appearance: controller.isSleepDisabled ? .aqua : .darkAqua
+            to: "\(directoryPath)/dashboard_nerd_en.png",
+            appearance: .aqua
         )
-        controller.isNerdDrawerExpanded = false
 
-        // Restore original language preference
+        controller.setScreenshotPreviewSleepDisabled(false)
+        controller.isNerdDrawerExpanded = false
+        exportWindowSnapshot(
+            rootView: MainWindowView(controller: controller),
+            size: NSSize(width: 460, height: 590),
+            to: "\(directoryPath)/dashboard_sleeping_en.png",
+            appearance: .darkAqua
+        )
+        exportWindowSnapshot(
+            rootView: MenuBarPopoverView(controller: controller),
+            size: NSSize(width: 340, height: 420),
+            to: "\(directoryPath)/menubar_popover_sleeping_en.png",
+            appearance: .darkAqua
+        )
+
+        // Restore original state & language preference
+        controller.setScreenshotPreviewSleepDisabled(originalSleepDisabled)
+        controller.isNerdDrawerExpanded = originalDrawer
         controller.selectLanguage(originalLang)
     }
 
