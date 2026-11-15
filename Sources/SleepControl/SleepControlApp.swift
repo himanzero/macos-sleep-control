@@ -57,12 +57,20 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         appMenuItem.submenu = appMenu
 
         let showItem = NSMenuItem(
-            title: L("window.main.title"),
+            title: L("app.name"),
             action: #selector(handleShowMainWindow),
             keyEquivalent: "0"
         )
         showItem.target = self
         appMenu.addItem(showItem)
+
+        let nerdItem = NSMenuItem(
+            title: L("window.main.title"),
+            action: #selector(handleShowNerdWindow),
+            keyEquivalent: "d"
+        )
+        nerdItem.target = self
+        appMenu.addItem(nerdItem)
         appMenu.addItem(NSMenuItem.separator())
 
         let quitItem = NSMenuItem(
@@ -98,5 +106,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     @objc private func handleShowMainWindow() {
         StatusItemManager.shared.showMainWindow()
+    }
+
+    @objc private func handleShowNerdWindow() {
+        StatusItemManager.shared.showNerdWindow()
     }
 }

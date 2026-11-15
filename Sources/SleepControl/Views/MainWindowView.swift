@@ -1,466 +1,307 @@
 import SwiftUI
 import AppKit
 
-/// Standalone main dashboard window adopting modern macOS Sequoia Bento-grid design
+/// Minimalist Haute Couture Editorial Magazine Cover main window
 struct MainWindowView: View {
     @ObservedObject var controller: AppController
+    @ObservedObject private var interaction = EditorialInteractionState()
 
     var body: some View {
+        let isAwake = controller.isSleepDisabled
+        let fg = EditorialTheme.foregroundColor(isAwake: isAwake)
+        let hairline = EditorialTheme.hairlineColor(isAwake: isAwake)
+
         ZStack {
-            // Multi-layered Aurora ambient backdrop
-            AuroraAmbientBackdrop(isSleepDisabled: controller.isSleepDisabled, intensity: 1.0)
+            EditorialCanvasBackdrop(isAwake: isAwake)
 
-            ScrollView {
-                VStack(alignment: .leading, spacing: 16) {
-                    // Header title, language switcher, and toolbar actions
-                    headerSection
+            HStack(spacing: 0) {
+                // Left: Primary Editorial Magazine Cover (always 460pt when drawer is expanded)
+                VStack(spacing: 0) {
+                    // Top editorial metadata bar (traffic lights occupy top-left natively)
+                    headerBar(isAwake: isAwake, fg: fg)
+                        .padding(.top, 14)
+                        .padding(.horizontal, 18)
 
-                    // Notification / Error banner (if active)
+                    Spacer(minLength: 14)
+
+                    // Hero high-fashion serif headline & localized subtitle
+                    VStack(spacing: 6) {
+                        Text(isAwake ? L("editorial.headline.awake") : L("editorial.headline.sleep"))
+                            .font(EditorialTheme.headlineFont(size: 46))
+                            .tracking(-0.6)
+                            .foregroundStyle(fg)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.75)
+
+                        Text(isAwake ? L("editorial.subtitle.awake") : L("editorial.subtitle.sleep"))
+                            .font(.system(size: 15, weight: .regular))
+                            .tracking(1.2)
+                            .foregroundStyle(fg.opacity(0.78))
+                            .lineLimit(1)
+                    }
+                    .padding(.horizontal, 24)
+
+                    Spacer(minLength: 12)
+
+                    // Centerpiece aloof & sharp couture cat (clickable to toggle sleep guard)
+                    centerpieceCat(isAwake: isAwake, fg: fg)
+
+                    Spacer(minLength: 10)
+
+                    // Transient notification / error banner (only shown when active)
                     if let banner = controller.bannerMessage {
-                        bannerSection(banner)
+                        editorialBanner(banner, isAwake: isAwake, fg: fg)
+                            .padding(.horizontal, 24)
+                            .padding(.bottom, 10)
                     }
 
-                    // 1. Hero Status Card
-                    StatusHeroCard(controller: controller, isCompact: false)
+                    // Bottom editorial footer strip separated by 1px hairline
+                    Rectangle()
+                        .fill(hairline)
+                        .frame(height: 1)
 
-                    // 2. Middle Bento Row: Smart Power Automation + Privilege & System Settings
-                    HStack(alignment: .top, spacing: 16) {
-                        powerAutomationCard
-                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-
-                        privilegeAndSystemCard
-                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-                    }
-                    .fixedSize(horizontal: false, vertical: true)
-
-                    // 3. Bottom Bento Row: Low-level pmset Telemetry + Activity Log Timeline
-                    HStack(alignment: .top, spacing: 16) {
-                        telemetryCard
-                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-
-                        activityLogCard
-                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-                    }
-                    .fixedSize(horizontal: false, vertical: true)
-
-                    // 4. Bottom-Left Version Display
-                    dashboardFooterSection
+                    footerBar(isAwake: isAwake, fg: fg)
+                        .padding(.horizontal, 24)
+                        .padding(.vertical, 18)
                 }
-                .padding(24)
+                .frame(minWidth: 420, idealWidth: 460, maxWidth: controller.isNerdDrawerExpanded ? 460 : .infinity)
+
+                // Right: Expandable Nerd Diagnostic Drawer
+                if controller.isNerdDrawerExpanded {
+                    Rectangle()
+                        .fill(hairline)
+                        .frame(width: 1)
+                        .ignoresSafeArea()
+
+                    NerdDashboardView(controller: controller)
+                        .transition(.move(edge: .trailing).combined(with: .opacity))
+                }
             }
         }
-        .frame(minWidth: 780, idealWidth: 850, minHeight: 760, idealHeight: 830)
+        .frame(
+            minWidth: controller.isNerdDrawerExpanded ? 940 : 420,
+            idealWidth: controller.isNerdDrawerExpanded ? 980 : 460,
+            minHeight: 540,
+            idealHeight: 590
+        )
+        .animation(.easeInOut(duration: 0.35), value: isAwake)
+        .animation(.spring(response: 0.32, dampingFraction: 0.86), value: controller.isNerdDrawerExpanded)
     }
 
-    // MARK: - Header Section
+    // MARK: - Top Metadata Bar
 
-    private var headerSection: some View {
-        HStack(alignment: .center, spacing: 12) {
-            VStack(alignment: .leading, spacing: 4) {
-                HStack(spacing: 10) {
-                    Text(L("window.main.title"))
-                        .font(.system(size: 24, weight: .bold, design: .rounded))
-                    Text(L("window.main.badge"))
-                        .font(.system(size: 12, weight: .medium, design: .rounded))
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 3)
-                        .background(Capsule().fill(Color.primary.opacity(0.07)))
-                        .foregroundStyle(.secondary)
-                }
-                Text(L("window.main.subtitle"))
-                    .font(.system(size: 13))
-                    .foregroundStyle(.secondary)
-            }
-
+    private func headerBar(isAwake: Bool, fg: Color) -> some View {
+        HStack(spacing: 8) {
             Spacer()
 
-            // Language switcher dropdown menu
-            LanguageSwitcherMenu(controller: controller, isCompact: false)
+            Text(isAwake ? L("editorial.issue.awake") : L("editorial.issue.sleep"))
+                .font(.system(size: 11, weight: .medium))
+                .tracking(1.4)
+                .foregroundStyle(fg.opacity(0.75))
+                .lineLimit(1)
 
+            EditorialLanguagePill(controller: controller, isAwake: isAwake)
+
+            // Discreet entry point to toggle the right-side Nerd Diagnostic Console drawer
             Button {
-                controller.refreshAllState()
+                withAnimation(.spring(response: 0.32, dampingFraction: 0.86)) {
+                    controller.isNerdDrawerExpanded.toggle()
+                }
             } label: {
-                Label(L("action.sync"), systemImage: "arrow.clockwise")
-                    .font(.system(size: 12.5, weight: .medium))
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 7)
+                Image(systemName: "terminal")
+                    .font(.system(size: 10.5, weight: .medium))
+                    .foregroundStyle(controller.isNerdDrawerExpanded ? EditorialTheme.amberAccent : fg.opacity(0.72))
+                    .padding(.horizontal, 7)
+                    .padding(.vertical, 4)
                     .background(
-                        RoundedRectangle(cornerRadius: 10, style: .continuous)
-                            .fill(.regularMaterial)
+                        RoundedRectangle(cornerRadius: 6, style: .continuous)
+                            .fill(fg.opacity(controller.isNerdDrawerExpanded ? 0.12 : (isAwake ? 0.05 : 0.08)))
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 6, style: .continuous)
+                            .strokeBorder(
+                                controller.isNerdDrawerExpanded ? EditorialTheme.amberAccent.opacity(0.65) : fg.opacity(0.18),
+                                lineWidth: 0.8
+                            )
                     )
             }
             .buttonStyle(.plain)
+            .help(L("editorial.nerd_console.help"))
         }
     }
 
-    // MARK: - Banner Section
+    // MARK: - Centerpiece Couture Cat
 
-    private func bannerSection(_ message: String) -> some View {
-        HStack(spacing: 10) {
-            Image(systemName: controller.isBannerError ? "exclamationmark.triangle.fill" : "checkmark.circle.fill")
-                .font(.system(size: 15))
-                .foregroundStyle(controller.isBannerError ? .red : .green)
+    private func centerpieceCat(isAwake: Bool, fg: Color) -> some View {
+        let assetName = isAwake ? "hero_cat_awake" : "hero_cat_sleeping"
+        let maxHeight: CGFloat = isAwake ? 265 : 235
+
+        return TimelineView(.animation(minimumInterval: 1.0 / 24.0)) { context in
+            let t = context.date.timeIntervalSinceReferenceDate
+            let breath = sin(t * (isAwake ? 1.5 : 1.0))
+
+            Button {
+                triggerCatTapFeedback()
+                controller.toggleSleepDisabled()
+            } label: {
+                Group {
+                    if let nsImage = EditorialImageLoader.loadImage(named: assetName) {
+                        Image(nsImage: nsImage)
+                            .renderingMode(.original)
+                            .resizable()
+                            .interpolation(.high)
+                            .scaledToFit()
+                            .frame(maxHeight: maxHeight)
+                    } else {
+                        Image(systemName: isAwake ? "cat.fill" : "cat")
+                            .font(.system(size: 110, weight: .ultraLight))
+                            .foregroundStyle(fg)
+                    }
+                }
+                .scaleEffect(interaction.isCatPressed ? 0.96 : (interaction.isCatHovered ? 1.025 : (1.0 + 0.008 * breath)))
+                .offset(y: isAwake ? (-1.5 * breath) : (1.0 * breath))
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .disabled(controller.isBusy)
+            .onHover { hovering in
+                withAnimation(.easeOut(duration: 0.22)) {
+                    interaction.isCatHovered = hovering
+                }
+            }
+            .help(isAwake ? L("editorial.pill.tap_sleep") : L("editorial.pill.tap_wake"))
+        }
+    }
+
+    private func triggerCatTapFeedback() {
+        withAnimation(.spring(response: 0.18, dampingFraction: 0.55)) {
+            interaction.isCatPressed = true
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.14) {
+            withAnimation(.spring(response: 0.28, dampingFraction: 0.65)) {
+                interaction.isCatPressed = false
+            }
+        }
+    }
+
+    // MARK: - Transient Editorial Banner
+
+    private func editorialBanner(_ message: String, isAwake: Bool, fg: Color) -> some View {
+        HStack(spacing: 8) {
+            Circle()
+                .fill(controller.isBannerError ? Color.red : EditorialTheme.amberAccent)
+                .frame(width: 6, height: 6)
+
             Text(message)
-                .font(.system(size: 13, weight: .medium))
-            Spacer()
+                .font(.system(size: 11.5, weight: .medium))
+                .foregroundStyle(fg.opacity(0.9))
+                .lineLimit(2)
+
+            Spacer(minLength: 4)
+
             Button {
                 controller.clearBanner()
             } label: {
-                Image(systemName: "xmark.circle.fill")
-                    .foregroundStyle(.secondary)
+                Image(systemName: "xmark")
+                    .font(.system(size: 10, weight: .semibold))
+                    .foregroundStyle(fg.opacity(0.6))
             }
             .buttonStyle(.plain)
         }
-        .padding(12)
-        .background(
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .fill((controller.isBannerError ? Color.red : Color.green).opacity(0.14))
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .strokeBorder((controller.isBannerError ? Color.red : Color.green).opacity(0.3), lineWidth: 1)
-        )
-    }
-
-    // MARK: - Smart Power Automation Card
-
-    private var powerAutomationCard: some View {
-        GlassCard(padding: 18, cornerRadius: 18) {
-            VStack(alignment: .leading, spacing: 14) {
-                HStack(spacing: 10) {
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 10, style: .continuous)
-                            .fill(Color.green.opacity(0.16))
-                            .frame(width: 38, height: 38)
-                        Image(systemName: "bolt.badge.automatic.fill")
-                            .font(.system(size: 18, weight: .semibold))
-                            .foregroundStyle(.green)
-                    }
-
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(L("auto.card.title"))
-                            .font(.system(size: 15, weight: .bold, design: .rounded))
-                        Text(L("auto.card.subtitle"))
-                            .font(.system(size: 11.5))
-                            .foregroundStyle(.secondary)
-                    }
-
-                    Spacer()
-
-                    Toggle("", isOn: $controller.autoDisableOnAC)
-                        .toggleStyle(.switch)
-                        .tint(.green)
-                        .labelsHidden()
-                }
-
-                Divider().opacity(0.5)
-
-                // Automation rules description
-                VStack(alignment: .leading, spacing: 8) {
-                    ruleRow(
-                        icon: "powerplug.fill",
-                        iconColor: .green,
-                        title: L("auto.rule.ac.title"),
-                        action: L("auto.rule.ac.action"),
-                        isActive: controller.autoDisableOnAC && controller.powerSnapshot.source == .ac
-                    )
-                    ruleRow(
-                        icon: "battery.75percent",
-                        iconColor: .orange,
-                        title: L("auto.rule.battery.title"),
-                        action: L("auto.rule.battery.action"),
-                        isActive: controller.autoDisableOnAC && controller.powerSnapshot.source == .battery
-                    )
-                }
-            }
-        }
-    }
-
-    private func ruleRow(icon: String, iconColor: Color, title: String, action: String, isActive: Bool) -> some View {
-        HStack(spacing: 10) {
-            Image(systemName: icon)
-                .font(.system(size: 13, weight: .semibold))
-                .foregroundStyle(iconColor)
-                .frame(width: 22)
-
-            VStack(alignment: .leading, spacing: 2) {
-                HStack(spacing: 6) {
-                    Text(title)
-                        .font(.system(size: 12, weight: .semibold))
-                    if isActive {
-                        Text(L("auto.rule.active_badge"))
-                            .font(.system(size: 9.5, weight: .bold))
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 1.5)
-                            .background(Capsule().fill(iconColor.opacity(0.2)))
-                            .foregroundStyle(iconColor)
-                    }
-                }
-                Text(action)
-                    .font(.system(size: 11))
-                    .foregroundStyle(.secondary)
-            }
-            Spacer()
-        }
-        .padding(9)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
         .background(
             RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .fill(isActive ? iconColor.opacity(0.08) : Color.primary.opacity(0.04))
+                .fill(fg.opacity(isAwake ? 0.06 : 0.09))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .strokeBorder(fg.opacity(0.16), lineWidth: 0.8)
         )
     }
 
-    // MARK: - Passwordless Authorization & System Settings Card
+    // MARK: - Bottom Dual-Pill Footer
 
-    private var privilegeAndSystemCard: some View {
-        GlassCard(padding: 18, cornerRadius: 18) {
-            VStack(alignment: .leading, spacing: 12) {
-                HStack(spacing: 10) {
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 10, style: .continuous)
-                            .fill((controller.isPasswordlessConfigured ? Color.blue : Color.orange).opacity(0.16))
-                            .frame(width: 38, height: 38)
-                        Image(systemName: controller.isPasswordlessConfigured ? "checkmark.shield.fill" : "lock.shield.fill")
-                            .font(.system(size: 18, weight: .semibold))
-                            .foregroundStyle(controller.isPasswordlessConfigured ? .blue : .orange)
-                    }
+    private func footerBar(isAwake: Bool, fg: Color) -> some View {
+        HStack(spacing: 14) {
+            // Left pill: Wake on AC Power toggle
+            Button {
+                controller.autoDisableOnAC.toggle()
+            } label: {
+                HStack(spacing: 7) {
+                    Image(systemName: "bolt.fill")
+                        .font(.system(size: 10.5, weight: .semibold))
 
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(L("priv.card.title"))
-                            .font(.system(size: 15, weight: .bold, design: .rounded))
-                        Text(controller.isPasswordlessConfigured
-                             ? L("priv.card.subtitle.enabled")
-                             : L("priv.card.subtitle.disabled"))
-                            .font(.system(size: 11.5))
-                            .foregroundStyle(.secondary)
-                    }
-                    Spacer()
-                }
-
-                Divider().opacity(0.5)
-
-                // Passwordless sudo row
-                HStack {
-                    VStack(alignment: .leading, spacing: 3) {
-                        HStack(spacing: 6) {
-                            Circle()
-                                .fill(controller.isPasswordlessConfigured ? Color.green : Color.orange)
-                                .frame(width: 7, height: 7)
-                            Text(controller.isPasswordlessConfigured ? L("priv.status.enabled") : L("priv.status.disabled"))
-                                .font(.system(size: 12.5, weight: .semibold))
-                        }
-                        Text(L("priv.status.detail"))
-                            .font(.system(size: 11))
-                            .foregroundStyle(.secondary)
-                    }
-
-                    Spacer()
-
-                    if controller.isPasswordlessConfigured {
-                        Button(L("priv.btn.revoke")) {
-                            controller.revokePasswordlessSudo()
-                        }
-                        .buttonStyle(.bordered)
-                        .controlSize(.small)
-                        .disabled(controller.isBusy)
+                    if isAwake {
+                        Text(L("editorial.pill.power_wake"))
+                            .font(.system(size: 12.5, weight: .medium))
+                            .lineLimit(1)
                     } else {
-                        Button(L("priv.btn.enable")) {
-                            controller.configurePasswordlessSudo()
-                        }
-                        .buttonStyle(.borderedProminent)
-                        .tint(.orange)
-                        .controlSize(.small)
-                        .disabled(controller.isBusy)
+                        Text(controller.autoDisableOnAC ? L("editorial.pill.power_wake_on") : L("editorial.pill.power_wake_off"))
+                            .font(.system(size: 12.5, weight: .medium))
+                            .lineLimit(1)
+                    }
+
+                    if controller.autoDisableOnAC {
+                        Circle()
+                            .fill(EditorialTheme.amberAccent)
+                            .frame(width: 6.5, height: 6.5)
+                            .shadow(color: EditorialTheme.amberAccent.opacity(0.6), radius: 3)
                     }
                 }
-                .padding(10)
-                .background(
-                    RoundedRectangle(cornerRadius: 10, style: .continuous)
-                        .fill(Color.primary.opacity(0.04))
+                .foregroundStyle(
+                    (isAwake && controller.autoDisableOnAC)
+                    ? EditorialTheme.warmAlabaster
+                    : fg.opacity(0.88)
                 )
-
-                // Launch at login row
-                HStack {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(L("system.launch.title"))
-                            .font(.system(size: 12.5, weight: .semibold))
-                        Text(L("system.launch.subtitle"))
-                            .font(.system(size: 11))
-                            .foregroundStyle(.secondary)
-                    }
-                    Spacer()
-                    Toggle("", isOn: Binding(
-                        get: { controller.launchAtLoginEnabled },
-                        set: { _ in controller.toggleLaunchAtLogin() }
-                    ))
-                    .toggleStyle(.switch)
-                    .labelsHidden()
-                }
-                .padding(.horizontal, 6)
-
-                // Interface language selection row
-                HStack {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(L("lang.setting.title"))
-                            .font(.system(size: 12.5, weight: .semibold))
-                        Text(L("lang.setting.subtitle"))
-                            .font(.system(size: 11))
-                            .foregroundStyle(.secondary)
-                    }
-                    Spacer()
-                    LanguageSwitcherMenu(controller: controller, isCompact: false)
-                }
-                .padding(.horizontal, 6)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 9.5)
+                .padding(.horizontal, 12)
+                .background(
+                    Capsule()
+                        .fill(
+                            isAwake
+                            ? (controller.autoDisableOnAC ? EditorialTheme.espressoInk : Color.clear)
+                            : Color.white.opacity(controller.autoDisableOnAC ? 0.12 : 0.06)
+                        )
+                )
+                .overlay(
+                    Capsule()
+                        .strokeBorder(
+                            fg.opacity(isAwake ? (controller.autoDisableOnAC ? 0.0 : 0.28) : 0.18),
+                            lineWidth: 0.9
+                        )
+                )
             }
-        }
-    }
+            .buttonStyle(.plain)
 
-    // MARK: - Low-level pmset Telemetry Card
-
-    private var telemetryCard: some View {
-        GlassCard(padding: 18, cornerRadius: 18) {
-            VStack(alignment: .leading, spacing: 12) {
-                HStack {
-                    Label(L("telemetry.card.title"), systemImage: "cpu.fill")
-                        .font(.system(size: 14, weight: .bold, design: .rounded))
-                    Spacer()
-                    Text("/usr/bin/pmset -g")
-                        .font(.system(size: 10.5, design: .monospaced))
-                        .foregroundStyle(.secondary)
+            // Right pill: Touch Cat to Sleep / Wake
+            Button {
+                triggerCatTapFeedback()
+                controller.toggleSleepDisabled()
+            } label: {
+                HStack(spacing: 7) {
+                    Image(systemName: isAwake ? "sparkle" : "moon.fill")
+                        .font(.system(size: 11, weight: .semibold))
+                    Text(isAwake ? L("editorial.pill.tap_sleep") : L("editorial.pill.tap_wake"))
+                        .font(.system(size: 12.5, weight: .medium))
+                        .lineLimit(1)
                 }
-
-                Divider().opacity(0.5)
-
-                VStack(spacing: 8) {
-                    telemetryRow(
-                        label: L("telemetry.row.sleepdisabled"),
-                        value: controller.isSleepDisabled ? L("telemetry.val.disabled") : L("telemetry.val.enabled"),
-                        highlightColor: controller.isSleepDisabled ? .orange : .cyan
-                    )
-                    telemetryRow(
-                        label: L("telemetry.row.powersource"),
-                        value: controller.powerSnapshot.formattedSummary,
-                        highlightColor: nil
-                    )
-                    telemetryRow(
-                        label: L("telemetry.row.displaysleep"),
-                        value: controller.telemetry.displaySleepFormatted,
-                        highlightColor: nil
-                    )
-                    telemetryRow(
-                        label: L("telemetry.row.systemsleep"),
-                        value: controller.telemetry.systemSleepFormatted,
-                        highlightColor: nil
-                    )
-                    telemetryRow(
-                        label: L("telemetry.row.hibernatemode"),
-                        value: controller.telemetry.hibernateModeFormatted,
-                        highlightColor: nil
-                    )
-                }
+                .foregroundStyle(fg.opacity(0.90))
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 9.5)
+                .padding(.horizontal, 12)
+                .background(
+                    Capsule()
+                        .fill(isAwake ? Color.clear : Color.white.opacity(0.08))
+                )
+                .overlay(
+                    Capsule()
+                        .strokeBorder(fg.opacity(isAwake ? 0.28 : 0.22), lineWidth: 0.9)
+                )
             }
+            .buttonStyle(.plain)
+            .disabled(controller.isBusy)
         }
-    }
-
-    private func telemetryRow(label: String, value: String, highlightColor: Color?) -> some View {
-        HStack {
-            Text(label)
-                .font(.system(size: 12))
-                .foregroundStyle(.secondary)
-            Spacer()
-            Text(value)
-                .font(.system(size: 12, weight: .semibold, design: .monospaced))
-                .foregroundStyle(highlightColor ?? .primary)
-        }
-        .padding(.vertical, 4)
-        .padding(.horizontal, 8)
-        .background(
-            RoundedRectangle(cornerRadius: 7, style: .continuous)
-                .fill(Color.primary.opacity(0.035))
-        )
-    }
-
-    // MARK: - Real-Time Activity Log Card
-
-    private var activityLogCard: some View {
-        GlassCard(padding: 18, cornerRadius: 18) {
-            VStack(alignment: .leading, spacing: 12) {
-                HStack {
-                    Label(L("log.card.title"), systemImage: "clock.arrow.circlepath")
-                        .font(.system(size: 14, weight: .bold, design: .rounded))
-                    Spacer()
-                    if !controller.activityLogs.isEmpty {
-                        Button(L("log.btn.clear")) {
-                            controller.clearLogs()
-                        }
-                        .font(.system(size: 11))
-                        .buttonStyle(.plain)
-                        .foregroundStyle(.secondary)
-                    }
-                }
-
-                Divider().opacity(0.5)
-
-                if controller.activityLogs.isEmpty {
-                    VStack(spacing: 6) {
-                        Image(systemName: "tray")
-                            .font(.system(size: 20))
-                            .foregroundStyle(.tertiary)
-                        Text(L("log.empty"))
-                            .font(.system(size: 12))
-                            .foregroundStyle(.secondary)
-                    }
-                    .frame(maxWidth: .infinity, minHeight: 130)
-                } else {
-                    ScrollView {
-                        VStack(alignment: .leading, spacing: 8) {
-                            ForEach(controller.activityLogs.prefix(8)) { log in
-                                HStack(alignment: .top, spacing: 8) {
-                                    Circle()
-                                        .fill(log.isSuccess ? (log.isAutomated ? Color.cyan : Color.green) : Color.red)
-                                        .frame(width: 7, height: 7)
-                                        .padding(.top, 5)
-
-                                    VStack(alignment: .leading, spacing: 2) {
-                                        HStack {
-                                            Text(log.title)
-                                                .font(.system(size: 12, weight: .semibold))
-                                            Spacer()
-                                            Text(log.formattedTime)
-                                                .font(.system(size: 10.5, design: .monospaced))
-                                                .foregroundStyle(.tertiary)
-                                        }
-                                        Text(log.detail)
-                                            .font(.system(size: 11))
-                                            .foregroundStyle(.secondary)
-                                            .lineLimit(2)
-                                    }
-                                }
-                                .padding(7)
-                                .background(
-                                    RoundedRectangle(cornerRadius: 8, style: .continuous)
-                                        .fill(Color.primary.opacity(0.035))
-                                )
-                            }
-                        }
-                    }
-                    .frame(maxHeight: 175)
-                }
-            }
-        }
-    }
-
-    // MARK: - Dashboard Footer Section
-
-    private var dashboardFooterSection: some View {
-        HStack {
-            Text(LF("dashboard.version", AppVersion.raw()))
-                .font(.system(size: 11, weight: .regular, design: .monospaced))
-                .foregroundStyle(.tertiary)
-                .lineLimit(1)
-                .allowsHitTesting(false)
-
-            Spacer()
-        }
-        .padding(.top, -6)
     }
 }

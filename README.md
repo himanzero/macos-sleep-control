@@ -17,15 +17,11 @@
 
 ## 📸 Screenshots
 
-### Bento Control Dashboard
-| English (`en`) | Simplified Chinese (`zh-Hans`) |
-| :---: | :---: |
-| ![SleepControl Dashboard (English)](docs/assets/dashboard_en.png) | ![SleepControl Dashboard (Simplified Chinese)](docs/assets/dashboard_zh.png) |
+### Editorial Cover & Diagnostic Console
+![SleepControl Editorial Window](docs/assets/dashboard_en.png)
 
 ### Menu Bar Quick Popover
-| English (`en`) | Simplified Chinese (`zh-Hans`) |
-| :---: | :---: |
-| ![Menu Bar Popover (English)](docs/assets/menubar_popover_en.png) | ![Menu Bar Popover (Simplified Chinese)](docs/assets/menubar_popover_zh.png) |
+![Menu Bar Popover](docs/assets/menubar_popover_en.png)
 
 ---
 
@@ -33,7 +29,7 @@
 
 1. **One-Click Toggle & Real-Time Status Synchronization**
    - Live telemetry monitoring of `SleepDisabled` via `/usr/bin/pmset -g`, display sleep timer, system sleep mode, and battery status.
-   - Seamless toggling between sleep allowed and sleep disabled from either the **Menu Bar Popover** or the standalone **Bento Dashboard Window**.
+   - Seamless toggling between sleep allowed and sleep disabled from either the **Menu Bar Popover** or the **Editorial Main Window** (with an expandable right-side **Diagnostic Console**).
    - External CLI changes (e.g., executing `pmset` in Terminal) are automatically synchronized in real time.
 
 2. **Smart AC Power Automation (Zero-Polling Hardware Events)**
@@ -49,13 +45,15 @@
    - All subsequent toggles and power-event triggers execute silently in milliseconds without intrusive password dialogs. Can be revoked at any time.
 
 4. **Multi-Language Support (i18n)**
-   - Fully localized across 5 languages:
+   - Fully localized across 7 languages:
      - **English (`en`)** (Default fallback)
      - **Simplified Chinese (`zh-Hans`)**
      - **Traditional Chinese - Taiwan (`zh-Hant-TW`)**
      - **Traditional Chinese - Hong Kong (`zh-Hant-HK`)**
      - **Japanese (`ja`)**
-   - Supports instant runtime language switching from the menu bar or dashboard without requiring an application restart.
+     - **French (`fr`)**
+     - **Spanish (`es`)**
+   - Supports instant runtime language switching from the cover header or diagnostic console without requiring an application restart.
 
 5. **Clean Dock & Menu Bar Integration**
    - Compact 22pt status bar icon with `⌘ Command + Drag` position reordering.

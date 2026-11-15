@@ -146,3 +146,20 @@
 "err.user_canceled" = "Administrator authentication was canceled.";
 "err.invalid_username" = "Current macOS username (%@) format is not supported.";
 "err.exec_failed" = "Privileged command failed (exit code %d)";
+
+
+/* Editorial Magazine UI */
+"editorial.issue.awake" = "NO. 01 · KEEP AWAKE";
+"editorial.issue.sleep" = "NO. 02 · RESTING";
+"editorial.headline.awake" = "WIDE AWAKE.";
+"editorial.headline.sleep" = "DEEP SLUMBER.";
+"editorial.subtitle.awake" = "Stay Awake · On Watch";
+"editorial.subtitle.sleep" = "Rest Mode · Sleep Allowed";
+"editorial.pill.power_wake" = "Wake on Power";
+"editorial.pill.power_wake_on" = "Wake on Power · On";
+"editorial.pill.power_wake_off" = "Wake on Power · Off";
+"editorial.pill.tap_sleep" = "Touch Cat to Sleep";
+"editorial.pill.tap_wake" = "Touch Cat to Wake";
+"editorial.popover.tap_hint" = "Click cat to toggle";
+"editorial.popover.power_auto" = "Auto-wake on power";
+"editorial.nerd_console.help" = "Open Diagnostic Console";

@@ -1,11 +1,11 @@
 import AppKit
 
-let inputPath = "/Users/himanzero/.gemini/antigravity/brain/d08f3109-7aa5-45a4-8049-ae0bc4e5bece/.user_uploaded/media_1793514693978_020b92dc.jpg"
-let outputIconsetPath = "AppIcon.iconset"
+let outputIconsetPath = CommandLine.arguments.count > 1 ? CommandLine.arguments[1] : ".build/AppIcon.iconset"
 let assetsIconPath = "docs/assets/app_icon.png"
+let heroCatPath = "Resources/hero_cat_awake@2x.png"
 
-guard let sourceImage = NSImage(contentsOfFile: inputPath) else {
-    print("Failed to load source image")
+guard let catImage = NSImage(contentsOfFile: heroCatPath) else {
+    fputs("Failed to load hero cat image at \(heroCatPath)\n", stderr)
     exit(1)
 }
 
@@ -13,38 +13,150 @@ let fm = FileManager.default
 try? fm.removeItem(atPath: outputIconsetPath)
 try fm.createDirectory(atPath: outputIconsetPath, withIntermediateDirectories: true)
 
-// In macOS Big Sur/Sequoia app icons, the black background surrounding the squircle must be transparent.
-// The uploaded image has a squircle icon centered on a black background (#000000).
-// We sample and mask everything outside the rounded squircle to alpha 0.
+let alabaster = CGColor(srgbRed: 0xF5 / 255.0, green: 0xF1 / 255.0, blue: 0xE8 / 255.0, alpha: 1.0)
+let obsidian = CGColor(srgbRed: 0x11 / 255.0, green: 0x12 / 255.0, blue: 0x16 / 255.0, alpha: 1.0)
+let ink = CGColor(srgbRed: 0x1A / 255.0, green: 0x19 / 255.0, blue: 0x17 / 255.0, alpha: 1.0)
+let inkSoft = CGColor(srgbRed: 0x1A / 255.0, green: 0x19 / 255.0, blue: 0x17 / 255.0, alpha: 0.22)
+let amber = CGColor(srgbRed: 0xE5 / 255.0, green: 0x9A / 255.0, blue: 0x3C / 255.0, alpha: 1.0)
 
-func maskToSquircle(source: NSImage, targetPixelSize: Int) -> NSImage {
-    let size = CGSize(width: targetPixelSize, height: targetPixelSize)
-    let output = NSImage(size: size)
-    output.lockFocus()
+/// Clean crescent moon rendered via CGContext transparency layer + .clear blend mode
+func drawSmoothCrescent(center: CGPoint, radius: CGFloat, color: CGColor, ctx: CGContext) {
+    ctx.saveGState()
+    ctx.beginTransparencyLayer(auxiliaryInfo: nil)
+    ctx.setFillColor(color)
+    ctx.fillEllipse(in: CGRect(x: center.x - radius, y: center.y - radius, width: radius * 2, height: radius * 2))
+    let cutoutCenter = CGPoint(x: center.x + radius * 0.42, y: center.y + radius * 0.26)
+    let cutoutR = radius * 0.84
+    ctx.setBlendMode(.clear)
+    ctx.fillEllipse(in: CGRect(x: cutoutCenter.x - cutoutR, y: cutoutCenter.y - cutoutR, width: cutoutR * 2, height: cutoutR * 2))
+    ctx.endTransparencyLayer()
+    ctx.restoreGState()
+}
 
+/// Editorial Power Mark (open Espresso Ink ring + Amber vertical bar)
+func drawPowerEmblem(center: CGPoint, radius: CGFloat, strokeWidth: CGFloat, ctx: CGContext) {
+    ctx.saveGState()
+    ctx.setLineCap(.round)
+    ctx.setStrokeColor(ink)
+    ctx.setLineWidth(strokeWidth)
+    ctx.addArc(center: center, radius: radius, startAngle: .pi * 0.68, endAngle: .pi * 0.32, clockwise: false)
+    ctx.strokePath()
+
+    ctx.setStrokeColor(amber)
+    ctx.setLineWidth(strokeWidth * 1.1)
+    ctx.move(to: CGPoint(x: center.x, y: center.y + radius * 0.05))
+    ctx.addLine(to: CGPoint(x: center.x, y: center.y + radius * 1.15))
+    ctx.strokePath()
+    ctx.restoreGState()
+}
+
+/// Renders the Editorial Day/Night Split App Icon:
+/// - Left half: Warm Alabaster (#F5F1E8) with Power emblem in top-left
+/// - Right half: Obsidian Velvet (#111216) with Amber Crescent Moon in top-right
+/// - Center: Sharp Couture Cat (Resources/hero_cat_awake@2x.png) straddling the chiaroscuro split
+func renderEditorialIcon(cat: NSImage, targetPixelSize: Int) -> NSBitmapImageRep? {
+    guard let rep = NSBitmapImageRep(
+        bitmapDataPlanes: nil,
+        pixelsWide: targetPixelSize,
+        pixelsHigh: targetPixelSize,
+        bitsPerSample: 8,
+        samplesPerPixel: 4,
+        hasAlpha: true,
+        isPlanar: false,
+        colorSpaceName: .deviceRGB,
+        bytesPerRow: 0,
+        bitsPerPixel: 0
+    ) else { return nil }
+
+    NSGraphicsContext.saveGraphicsState()
+    NSGraphicsContext.current = NSGraphicsContext(bitmapImageRep: rep)
     guard let ctx = NSGraphicsContext.current?.cgContext else {
-        output.unlockFocus()
-        return output
+        NSGraphicsContext.restoreGraphicsState()
+        return nil
     }
 
-    let rect = CGRect(origin: .zero, size: size)
-    
-    // In macOS Big Sur standard grid:
-    // If the image already has the 1024x1024 bounding box with squircle taking up the standard inner area (~824x824, inset ~100px or ~10%):
-    // Let's create an accurate squircle mask matching the squircle boundary of the image.
-    // The image has black corners. We create a mask for the squircle:
-    let inset = CGFloat(targetPixelSize) * 0.082
+    NSGraphicsContext.current?.imageInterpolation = .high
+    let s = CGFloat(targetPixelSize)
+    let rect = CGRect(x: 0, y: 0, width: s, height: s)
+
+    let inset = s * 0.082
     let iconRect = rect.insetBy(dx: inset, dy: inset)
     let cornerRadius = iconRect.width * 0.225
+    let squirclePath = CGPath(
+        roundedRect: iconRect,
+        cornerWidth: cornerRadius,
+        cornerHeight: cornerRadius,
+        transform: nil
+    )
 
-    let path = CGPath(roundedRect: iconRect, cornerWidth: cornerRadius, cornerHeight: cornerRadius, transform: nil)
-    ctx.addPath(path)
+    ctx.saveGState()
+    ctx.addPath(squirclePath)
     ctx.clip()
 
-    source.draw(in: rect, from: .zero, operation: .copy, fraction: 1.0)
+    // Left half: Warm Alabaster (#F5F1E8)
+    ctx.setFillColor(alabaster)
+    ctx.fill(iconRect)
 
-    output.unlockFocus()
-    return output
+    // Right half: Obsidian Velvet (#111216)
+    let rightHalf = CGRect(x: s * 0.5, y: iconRect.minY, width: iconRect.width * 0.5 + 2, height: iconRect.height)
+    ctx.setFillColor(obsidian)
+    ctx.fill(rightHalf)
+
+    // Centered Couture Cat straddling the day/night split
+    let catAspect = cat.size.width / max(cat.size.height, 1)
+    let targetCatHeight = iconRect.height * 0.80
+    let targetCatWidth = targetCatHeight * catAspect
+    let catRect = CGRect(
+        x: (s - targetCatWidth) * 0.5,
+        y: iconRect.minY + iconRect.height * 0.08,
+        width: targetCatWidth,
+        height: targetCatHeight
+    )
+    cat.draw(in: catRect, from: .zero, operation: .sourceOver, fraction: 1.0)
+
+    // Top-left Power emblem & Top-right Amber Crescent Moon (cleanly legible at >= 32px)
+    if targetPixelSize >= 32 {
+        drawPowerEmblem(
+            center: CGPoint(
+                x: iconRect.minX + iconRect.width * 0.165,
+                y: iconRect.maxY - iconRect.height * 0.17
+            ),
+            radius: iconRect.width * 0.056,
+            strokeWidth: max(1.6, iconRect.width * 0.015),
+            ctx: ctx
+        )
+
+        drawSmoothCrescent(
+            center: CGPoint(
+                x: iconRect.maxX - iconRect.width * 0.165,
+                y: iconRect.maxY - iconRect.height * 0.165
+            ),
+            radius: iconRect.width * 0.060,
+            color: amber,
+            ctx: ctx
+        )
+    }
+
+    ctx.restoreGState()
+
+    // Crisp hairline border around squircle
+    ctx.saveGState()
+    let borderWidth = max(1.0, s * 0.004)
+    let borderRect = iconRect.insetBy(dx: borderWidth * 0.5, dy: borderWidth * 0.5)
+    let borderPath = CGPath(
+        roundedRect: borderRect,
+        cornerWidth: max(0, cornerRadius - borderWidth * 0.5),
+        cornerHeight: max(0, cornerRadius - borderWidth * 0.5),
+        transform: nil
+    )
+    ctx.addPath(borderPath)
+    ctx.setStrokeColor(inkSoft)
+    ctx.setLineWidth(borderWidth)
+    ctx.strokePath()
+    ctx.restoreGState()
+
+    NSGraphicsContext.restoreGraphicsState()
+    return rep
 }
 
 let iconSpecs: [(name: String, pixels: Int)] = [
@@ -61,31 +173,15 @@ let iconSpecs: [(name: String, pixels: Int)] = [
 ]
 
 for spec in iconSpecs {
-    let masked = maskToSquircle(source: sourceImage, targetPixelSize: spec.pixels)
-    guard let rep = NSBitmapImageRep(
-        bitmapDataPlanes: nil,
-        pixelsWide: spec.pixels,
-        pixelsHigh: spec.pixels,
-        bitsPerSample: 8,
-        samplesPerPixel: 4,
-        hasAlpha: true,
-        isPlanar: false,
-        colorSpaceName: .deviceRGB,
-        bytesPerRow: 0,
-        bitsPerPixel: 0
-    ) else { continue }
-
-    NSGraphicsContext.saveGraphicsState()
-    NSGraphicsContext.current = NSGraphicsContext(bitmapImageRep: rep)
-    masked.draw(in: CGRect(x: 0, y: 0, width: spec.pixels, height: spec.pixels))
-    NSGraphicsContext.restoreGraphicsState()
-
-    if let pngData = rep.representation(using: .png, properties: [:]) {
-        try pngData.write(to: URL(fileURLWithPath: "\(outputIconsetPath)/\(spec.name)"))
-        if spec.pixels == 512 {
-            try pngData.write(to: URL(fileURLWithPath: assetsIconPath))
-        }
+    guard let rep = renderEditorialIcon(cat: catImage, targetPixelSize: spec.pixels),
+          let pngData = rep.representation(using: .png, properties: [:]) else {
+        fputs("Failed to render icon size \(spec.pixels)\n", stderr)
+        exit(1)
+    }
+    try pngData.write(to: URL(fileURLWithPath: "\(outputIconsetPath)/\(spec.name)"))
+    if spec.pixels == 512 {
+        try pngData.write(to: URL(fileURLWithPath: assetsIconPath))
     }
 }
 
-print("Iconset created successfully.")
+print("Editorial AppIcon iconset created at \(outputIconsetPath) and \(assetsIconPath).")

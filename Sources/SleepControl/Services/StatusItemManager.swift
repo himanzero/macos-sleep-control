@@ -48,7 +48,7 @@ final class StatusItemManager: NSObject, NSWindowDelegate {
     private var statusPanel: StatusBarPanel?
     private var panelHostingView: NSHostingView<MenuBarPopoverView>?
     private var outsideClickMonitor: Any?
-    private var preferredPanelWidth: CGFloat = 440
+    private var preferredPanelWidth: CGFloat = 340
     private var mainWindow: NSWindow?
     private var controller: AppController?
     private var cancellables = Set<AnyCancellable>()
@@ -88,8 +88,17 @@ final class StatusItemManager: NSObject, NSWindowDelegate {
             .sink { [weak self] _ in
                 guard let self = self, let ctrl = self.controller else { return }
                 self.updateIcon(isSleepDisabled: ctrl.isSleepDisabled)
-                self.mainWindow?.title = L("window.main.title")
+                self.mainWindow?.title = L("app.name")
                 self.adjustPanelSizeIfVisible()
+            }
+            .store(in: &cancellables)
+
+        // Observe Nerd drawer expansion to smoothly resize mainWindow horizontally
+        controller.$isNerdDrawerExpanded
+            .dropFirst()
+            .receive(on: RunLoop.main)
+            .sink { [weak self] expanded in
+                self?.resizeMainWindowForDrawer(expanded: expanded)
             }
             .store(in: &cancellables)
 
@@ -130,8 +139,8 @@ final class StatusItemManager: NSObject, NSWindowDelegate {
         panel.hasShadow = true
         panel.isReleasedWhenClosed = false
         panel.isRestorable = false
-        panel.minSize = NSSize(width: 370, height: 330)
-        panel.maxSize = NSSize(width: 540, height: 640)
+        panel.minSize = NSSize(width: 320, height: 380)
+        panel.maxSize = NSSize(width: 420, height: 560)
         panel.delegate = self
 
         let visualEffect = NSVisualEffectView(frame: initialRect)
@@ -170,7 +179,7 @@ final class StatusItemManager: NSObject, NSWindowDelegate {
             let hostingController = NSHostingController(rootView: MainWindowView(controller: controller))
             let window = NSWindow(contentViewController: hostingController)
             window.identifier = NSUserInterfaceItemIdentifier("main-window")
-            window.title = L("window.main.title")
+            window.title = L("app.name")
             window.styleMask = [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView]
             window.titlebarAppearsTransparent = true
             window.titleVisibility = .hidden
@@ -179,8 +188,8 @@ final class StatusItemManager: NSObject, NSWindowDelegate {
             // Preserve the window instance when the user clicks the close ('x') button so it can be re-shown anytime
             window.isReleasedWhenClosed = false
             window.delegate = self
-            window.setContentSize(NSSize(width: 850, height: 830))
-            window.minSize = NSSize(width: 780, height: 750)
+            window.setContentSize(NSSize(width: controller.isNerdDrawerExpanded ? 980 : 460, height: 590))
+            window.minSize = NSSize(width: 420, height: 540)
             window.center()
             self.mainWindow = window
         }
@@ -193,13 +202,42 @@ final class StatusItemManager: NSObject, NSWindowDelegate {
         NSApp.activate(ignoringOtherApps: true)
     }
 
+    /// Expands the right-side Nerd diagnostic drawer inside the main window (e.g. via Cmd+D)
+    func showNerdWindow() {
+        controller?.isNerdDrawerExpanded = true
+        showMainWindow()
+    }
+
+    /// Smoothly expands or collapses the main window width when the right-side Nerd drawer toggles
+    private func resizeMainWindowForDrawer(expanded: Bool) {
+        guard let window = mainWindow else { return }
+        let targetContentWidth: CGFloat = expanded ? 980 : 460
+        let currentFrame = window.frame
+        let currentContentSize = window.contentRect(forFrameRect: currentFrame).size
+        let targetFrameSize = window.frameRect(forContentRect: NSRect(origin: .zero, size: NSSize(width: targetContentWidth, height: currentContentSize.height))).size
+
+        var nextFrame = NSRect(
+            x: currentFrame.origin.x,
+            y: currentFrame.origin.y,
+            width: targetFrameSize.width,
+            height: currentFrame.height
+        )
+        if let visibleFrame = (window.screen ?? NSScreen.main)?.visibleFrame {
+            if nextFrame.maxX > visibleFrame.maxX - 12 {
+                nextFrame.origin.x = max(visibleFrame.minX + 12, visibleFrame.maxX - nextFrame.width - 12)
+            }
+        }
+        window.minSize = NSSize(width: expanded ? 940 : 420, height: 540)
+        window.setFrame(nextFrame, display: true, animate: true)
+    }
+
     // MARK: - NSWindowDelegate
 
     func windowWillClose(_ notification: Notification) {
         guard let closingWindow = notification.object as? NSWindow, closingWindow == mainWindow else {
             return
         }
-        // Hide the Dock icon (.accessory policy) when the main dashboard window is closed while continuing background execution
+        // Hide the Dock icon (.accessory policy) when the main window is closed while continuing background execution
         DispatchQueue.main.async {
             NSApp.setActivationPolicy(.accessory)
         }

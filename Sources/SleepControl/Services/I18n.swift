@@ -8,6 +8,8 @@ enum AppLanguage: String, CaseIterable, Identifiable {
     case zhHantTW = "zh-Hant-TW"
     case zhHantHK = "zh-Hant-HK"
     case ja = "ja"
+    case fr = "fr"
+    case es = "es"
 
     var id: String { rawValue }
 
@@ -28,6 +30,10 @@ enum AppLanguage: String, CaseIterable, Identifiable {
             return "繁體中文（香港）"
         case .ja:
             return "日本語"
+        case .fr:
+            return "Français"
+        case .es:
+            return "Español"
         }
     }
 
@@ -45,6 +51,10 @@ enum AppLanguage: String, CaseIterable, Identifiable {
             return "繁體中文（香港）"
         case .ja:
             return "日本語"
+        case .fr:
+            return "Français"
+        case .es:
+            return "Español"
         }
     }
 
@@ -62,6 +72,10 @@ enum AppLanguage: String, CaseIterable, Identifiable {
             return "繁HK"
         case .ja:
             return "JA"
+        case .fr:
+            return "FR"
+        case .es:
+            return "ES"
         }
     }
 
@@ -95,6 +109,14 @@ enum AppLanguage: String, CaseIterable, Identifiable {
 
         if primary.hasPrefix("ja") {
             return .ja
+        }
+
+        if primary.hasPrefix("fr") {
+            return .fr
+        }
+
+        if primary.hasPrefix("es") {
+            return .es
         }
 
         if primary.hasPrefix("en") {

@@ -1,0 +1,164 @@
+/* App & Window Titles */
+"app.name" = "SleepControl";
+"app.subtitle" = "Guardián de Reposo";
+"window.main.title" = "Panel SleepControl";
+"window.main.badge" = "Control de Energía y Tapa macOS";
+"window.main.subtitle" = "Gestiona pmset disablesleep con automatización de corriente CA y modo tapa cerrada";
+"dashboard.version" = "v%@";
+
+/* Menu Bar Label */
+"menubar.status.awake" = "Despierto";
+"menubar.status.sleep" = "Reposo";
+
+/* Language Switcher */
+"lang.menu.title" = "Idioma";
+"lang.option.system" = "Según el sistema";
+"lang.setting.title" = "Idioma de la interfaz";
+"lang.setting.subtitle" = "Usa el idioma del sistema por defecto (inglés como respaldo)";
+
+/* Hero Card */
+"hero.status.disabled" = "Reposo del sistema desactivado";
+"hero.status.enabled" = "Reposo del sistema permitido";
+"hero.desc.disabled" = "El Mac permanece despierto incluso inactivo o con la tapa cerrada";
+"hero.desc.enabled" = "Sigue la política estándar de macOS; entra en reposo al cerrar la tapa";
+"hero.button.allow_sleep" = "Permitir reposo";
+"hero.button.disable_sleep" = "Mantener despierto";
+
+/* Companion Mood & Interactive Quotes */
+"companion.mood.awake.badge" = "Centinela Despierto";
+"companion.mood.sleep.badge" = "Ronroneo en Sueños";
+"companion.pet.hint" = "Haz clic para acariciar al gato";
+"companion.quote.awake.0" = "Miau. Sigo vigilando: cierra la tapa cuando quieras, tu Mac seguirá despierto.";
+"companion.quote.awake.1" = "Orejas alerta. El café está caliente y tus tareas en segundo plano están a salvo.";
+"companion.quote.awake.2" = "Ronroneo… Custodiando tu sesión con tapa cerrada al 100%.";
+"companion.quote.sleep.0" = "Zzz… Acurrucado con macOS para ahorrar batería.";
+"companion.quote.sleep.1" = "Ronroneo… Dulces sueños. Cierra la tapa cuando quieras descansar.";
+"companion.quote.sleep.2" = "Qué calma… Entrando suavemente en reposo bajo las estrellas.";
+
+/* Power Source */
+"power.source.ac" = "Corriente CA";
+"power.source.battery" = "Batería";
+"power.source.unknown" = "Energía desconocida";
+"power.badge.ac" = "Conectado";
+"power.badge.battery" = "En batería";
+"power.badge.unknown" = "Desconocido";
+"power.status.charging" = "Cargando";
+"power.status.charged" = "Cargada";
+"power.status.external" = "Energía externa";
+"power.summary.ac" = "%@ · %d%% (%@)";
+"power.summary.battery" = "%@ · %d%% restante";
+
+/* Smart Power Automation */
+"auto.card.title" = "Automatización de Energía";
+"auto.card.subtitle" = "Eventos de hardware IOKit sin sondeo";
+"auto.menubar.title" = "Despierto auto con CA";
+"auto.menubar.subtitle" = "Evita reposo al enchufar; restaura en batería";
+"auto.rule.ac.title" = "Corriente CA conectada";
+"auto.rule.ac.action" = "Ejecuta disablesleep 1 automáticamente (Evitar reposo)";
+"auto.rule.battery.title" = "Cambio a batería";
+"auto.rule.battery.action" = "Restaura disablesleep 0 automáticamente (Permitir reposo)";
+"auto.rule.active_badge" = "Activo";
+"auto.tip.passwordless" = "Activa el acceso sin contraseña para cambiar en silencio al enchufar";
+"auto.tip.configure_btn" = "Activar";
+
+/* Privilege & System Settings */
+"priv.card.title" = "Acceso Sin Contraseña y Sistema";
+"priv.card.subtitle.enabled" = "Configurado en /etc/sudoers.d/mac_sleep_control";
+"priv.card.subtitle.disabled" = "Evita pedir contraseña al alternar o cambiar de energía";
+"priv.badge.enabled" = "Sin contraseña activo";
+"priv.badge.disabled" = "Activar sin contraseña";
+"priv.help.enabled" = "Sudoers configurado para cambio instantáneo y silencioso";
+"priv.help.disabled" = "Haz clic para autorizar pmset sin contraseña";
+"priv.status.enabled" = "Canal instantáneo sin contraseña activo";
+"priv.status.disabled" = "Acceso sin contraseña no configurado";
+"priv.status.detail" = "Concede NOPASSWD exclusivamente a /usr/bin/pmset";
+"priv.btn.revoke" = "Revocar";
+"priv.btn.enable" = "Activar sin contraseña";
+"system.launch.title" = "Abrir al iniciar sesión";
+"system.launch.subtitle" = "Permanece en la barra de menús y vigila la energía";
+
+/* Telemetry Card */
+"telemetry.card.title" = "Telemetría pmset en vivo";
+"telemetry.row.sleepdisabled" = "SleepDisabled (Guarda global)";
+"telemetry.val.disabled" = "1 (Reposo desactivado)";
+"telemetry.val.enabled" = "0 (Reposo permitido)";
+"telemetry.row.powersource" = "Fuente de energía actual";
+"telemetry.row.displaysleep" = "Reposo de pantalla (displaysleep)";
+"telemetry.row.systemsleep" = "Reposo por inactividad (sleep)";
+"telemetry.row.hibernatemode" = "Modo hibernación (hibernatemode)";
+"telemetry.val.never" = "Nunca";
+"telemetry.val.minutes" = "%@ min";
+"telemetry.val.disabled_zero" = "Desactivado (0)";
+"telemetry.val.mode" = "Modo %@";
+"telemetry.val.on" = "Sí";
+"telemetry.val.off" = "No";
+
+/* Activity Log Card */
+"log.card.title" = "Actividad reciente y registro";
+"log.btn.clear" = "Limpiar";
+"log.empty" = "Sin actividad registrada";
+
+/* Bottom & Header Actions */
+"action.open_dashboard" = "Panel";
+"action.refresh" = "Actualizar";
+"action.sync" = "Sincronizar";
+"action.quit" = "Salir";
+
+/* Log & Banner Messages */
+"msg.ready.title" = "Estado del sistema listo";
+"msg.ready.detail" = "Estado: %@ · %@";
+"msg.external_change.title" = "Cambio externo detectado";
+"msg.external_change.detail" = "El reposo del sistema cambió a: %@";
+"msg.toggle.disabled" = "Reposo del sistema desactivado (disablesleep 1)";
+"msg.toggle.enabled" = "Reposo del sistema permitido (disablesleep 0)";
+"msg.toggle.source" = "Origen: %@";
+"msg.toggle.failed" = "Cambio de reposo incompleto";
+"msg.reason.manual" = "Cambio manual";
+"msg.reason.hero_switch" = "Interruptor principal";
+"msg.reason.startup_sync" = "Inicio · Sincronización de energía";
+"msg.reason.startup_battery_recovery" = "Inicio · Recuperación de reposo en batería";
+"msg.reason.auto_enabled" = "Automatización de energía activada";
+"msg.reason.auth_done_sync" = "Acceso sin contraseña · Sincronización";
+"msg.power.ac_connected" = "Corriente CA conectada";
+"msg.power.battery_switched" = "Cambio a batería";
+"msg.power.clamshell_sleep.title" = "Reposo por tapa cerrada activado";
+"msg.power.clamshell_sleep.detail" = "Cambió a batería con la tapa cerrada; reposo inmediato";
+"msg.power.ac_companion_banner" = "⚡️ ¡Corriente CA conectada! El gato vigila tu Mac bien despierto.";
+"msg.power.battery_companion_banner" = "🌙 En batería — El gato se acurruca para ahorrar energía.";
+"msg.auto.turned_on.title" = "Despierto auto con CA activado";
+"msg.auto.turned_on.detail" = "Enchufado -> disablesleep 1; En batería -> disablesleep 0";
+"msg.auto.turned_off.title" = "Despierto auto con CA desactivado";
+"msg.auto.turned_off.detail" = "El estado de reposo no cambiará al variar la energía";
+"msg.auth.canceled" = "Autorización cancelada";
+"msg.auth.enabled.banner" = "¡Acceso sin contraseña activado! Los cambios se harán en silencio.";
+"msg.auth.enabled.title" = "Acceso pmset sin contraseña activado";
+"msg.auth.enabled.detail" = "Configurado /etc/sudoers.d/mac_sleep_control";
+"msg.auth.revoked.banner" = "Acceso sin contraseña eliminado. Se pedirá clave al cambiar.";
+"msg.auth.revoked.title" = "Acceso sin contraseña revocado";
+"msg.auth.revoked.detail" = "Eliminado /etc/sudoers.d/mac_sleep_control";
+"msg.launch.on" = "Inicio al abrir sesión activado";
+"msg.launch.off" = "Inicio al abrir sesión desactivado";
+"msg.launch.detail" = "Gestionado mediante macOS SMAppService";
+"msg.launch.error" = "Error al actualizar inicio automático: %@";
+
+/* Errors */
+"err.passwordless_not_configured" = "El acceso sin contraseña aún no está activo. Haz clic en «Activar sin contraseña» para cambiar en silencio.";
+"err.user_canceled" = "Autenticación de administrador cancelada.";
+"err.invalid_username" = "El formato de usuario macOS (%@) no es compatible.";
+"err.exec_failed" = "Error en comando privilegiado (código %d)";
+
+/* Editorial Magazine UI */
+"editorial.issue.awake" = "N.º 01 · EN VIGILIA";
+"editorial.issue.sleep" = "N.º 02 · EN REPOSO";
+"editorial.headline.awake" = "BIEN DESPIERTO.";
+"editorial.headline.sleep" = "DULCE SUEÑO.";
+"editorial.subtitle.awake" = "Modo Activo · En Guardia";
+"editorial.subtitle.sleep" = "Modo Calma · Reposo Libre";
+"editorial.pill.power_wake" = "Despierto CA";
+"editorial.pill.power_wake_on" = "Modo CA · Sí";
+"editorial.pill.power_wake_off" = "Modo CA · No";
+"editorial.pill.tap_sleep" = "Tocar · Reposo";
+"editorial.pill.tap_wake" = "Tocar · Despertar";
+"editorial.popover.tap_hint" = "Toca el gato para alternar";
+"editorial.popover.power_auto" = "Despierto auto con CA";
+"editorial.nerd_console.help" = "Abrir consola de diagnóstico";

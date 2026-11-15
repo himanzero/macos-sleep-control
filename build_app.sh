@@ -7,14 +7,16 @@ APP_NAME="SleepControl"
 APP_BUNDLE="${APP_NAME}.app"
 BUILD_DIR=".build/release"
 
-# Dynamically resolve marketing version from git tag or environment
+# Dynamically resolve marketing version from environment, newer git tag, or current release baseline
+DEFAULT_VERSION="2.0.0"
 GIT_TAG="$(git describe --tags --abbrev=0 2>/dev/null || true)"
+TAG_VER="${GIT_TAG#v}"
 if [[ -n "${APP_VERSION:-}" ]]; then
     VERSION_STRING="${APP_VERSION#v}"
-elif [[ -n "${GIT_TAG}" ]]; then
-    VERSION_STRING="${GIT_TAG#v}"
+elif [[ -n "${TAG_VER}" && "$(printf '%s\n%s\n' "${DEFAULT_VERSION}" "${TAG_VER}" | sort -V | head -n1)" == "${DEFAULT_VERSION}" && "${TAG_VER}" != "${DEFAULT_VERSION}" ]]; then
+    VERSION_STRING="${TAG_VER}"
 else
-    VERSION_STRING="1.1.2"
+    VERSION_STRING="${DEFAULT_VERSION}"
 fi
 
 # Resolve build number from commit count or environment
@@ -26,7 +28,7 @@ echo "ℹ️  Resolved target version: ${VERSION_STRING} (build ${BUILD_NUMBER})
 echo "🔨 [1/4] Building ${APP_NAME} (Release)..."
 swift build -c release -Xswiftc -nonlib-dependency-scanner
 
-if [[ ! -f ".build/AppIcon.icns" ]]; then
+if [[ ! -f ".build/AppIcon.icns" || "scripts/generate_icon.swift" -nt ".build/AppIcon.icns" || "Resources/hero_cat_awake@2x.png" -nt ".build/AppIcon.icns" ]]; then
     echo "🎨 [2/4] Generating macOS application icon (AppIcon.icns)..."
     ICONSET_DIR=".build/AppIcon.iconset"
     swift scripts/generate_icon.swift "${ICONSET_DIR}"
@@ -65,6 +67,8 @@ cat > "${APP_BUNDLE}/Contents/Info.plist" <<EOF
         <string>zh-Hant-TW</string>
         <string>zh-Hant-HK</string>
         <string>ja</string>
+        <string>fr</string>
+        <string>es</string>
     </array>
     <key>CFBundleDisplayName</key>
     <string>SleepControl</string>

@@ -30,6 +30,8 @@ final class AppController: ObservableObject {
     @Published private(set) var isPetBouncing: Bool = false
     /// Transient floating heart badge when user pets the companion cat
     @Published private(set) var showPetHeart: Bool = false
+    /// Controls whether the right-side Nerd diagnostic drawer is expanded in MainWindowView
+    @Published var isNerdDrawerExpanded: Bool = false
 
     /// Current application version string (e.g. "1.1.2")
     var appVersionString: String {

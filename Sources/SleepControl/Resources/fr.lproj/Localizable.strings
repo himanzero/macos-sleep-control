@@ -1,0 +1,164 @@
+/* App & Window Titles */
+"app.name" = "SleepControl";
+"app.subtitle" = "Garde Veille";
+"window.main.title" = "Console SleepControl";
+"window.main.badge" = "Contrôle d'Alimentation & Capot macOS";
+"window.main.subtitle" = "Pilotez pmset disablesleep avec automatisation secteur IOKit et veille capot fermé";
+"dashboard.version" = "v%@";
+
+/* Menu Bar Label */
+"menubar.status.awake" = "Éveil";
+"menubar.status.sleep" = "Veille";
+
+/* Language Switcher */
+"lang.menu.title" = "Langue";
+"lang.option.system" = "Suivre le système";
+"lang.setting.title" = "Langue de l'interface";
+"lang.setting.subtitle" = "Suit la langue du système par défaut (anglais en secours)";
+
+/* Hero Card */
+"hero.status.disabled" = "Veille système désactivée";
+"hero.status.enabled" = "Veille système autorisée";
+"hero.desc.disabled" = "Votre Mac reste éveillé même inactif ou capot fermé";
+"hero.desc.enabled" = "Suit la politique d'énergie macOS ; se met en veille capot fermé";
+"hero.button.allow_sleep" = "Autoriser la veille";
+"hero.button.disable_sleep" = "Maintenir l'éveil";
+
+/* Companion Mood & Interactive Quotes */
+"companion.mood.awake.badge" = "Sentinelle Éveillée";
+"companion.mood.sleep.badge" = "Ronron au Pays des Songes";
+"companion.pet.hint" = "Touchez pour caresser le chat";
+"companion.quote.awake.0" = "Miaou. Je veille au grain — fermez le capot si vous voulez, le Mac ne dormira pas.";
+"companion.quote.awake.1" = "Oreilles dressées. Le café est chaud et vos tâches tournent sous ma garde.";
+"companion.quote.awake.2" = "Ronron… Mode haute vigilance activé, capot fermé sous contrôle absolu.";
+"companion.quote.sleep.0" = "Zzz… Je me love contre macOS pour préserver la batterie.";
+"companion.quote.sleep.1" = "Ronron… Faites de beaux rêves. Fermez le capot quand vous voudrez.";
+"companion.quote.sleep.2" = "Quel calme… Glissement tout en douceur vers la veille étoilée.";
+
+/* Power Source */
+"power.source.ac" = "Secteur";
+"power.source.battery" = "Batterie";
+"power.source.unknown" = "Source inconnue";
+"power.badge.ac" = "Sur secteur";
+"power.badge.battery" = "Sur batterie";
+"power.badge.unknown" = "Inconnu";
+"power.status.charging" = "En charge";
+"power.status.charged" = "Chargée";
+"power.status.external" = "Alimentation externe";
+"power.summary.ac" = "%@ · %d%% (%@)";
+"power.summary.battery" = "%@ · %d%% restant";
+
+/* Smart Power Automation */
+"auto.card.title" = "Automatisation Secteur";
+"auto.card.subtitle" = "Événements matériels IOKit sans scrutation";
+"auto.menubar.title" = "Éveil auto sur secteur";
+"auto.menubar.subtitle" = "Maintient l'éveil sur secteur ; rétablit la veille sur batterie";
+"auto.rule.ac.title" = "Secteur branché";
+"auto.rule.ac.action" = "Exécute disablesleep 1 automatiquement (Éveil continu)";
+"auto.rule.battery.title" = "Passage sur batterie";
+"auto.rule.battery.action" = "Rétablit disablesleep 0 automatiquement (Veille autorisée)";
+"auto.rule.active_badge" = "Actif";
+"auto.tip.passwordless" = "Activez l'accès sans mot de passe pour un basculement silencieux";
+"auto.tip.configure_btn" = "Activer";
+
+/* Privilege & System Settings */
+"priv.card.title" = "Accès Sans Mot de Passe & Système";
+"priv.card.subtitle.enabled" = "Configuré dans /etc/sudoers.d/mac_sleep_control";
+"priv.card.subtitle.disabled" = "Évite les demandes de mot de passe lors des bascules";
+"priv.badge.enabled" = "Sans mot de passe actif";
+"priv.badge.disabled" = "Configurer l'accès";
+"priv.help.enabled" = "Sudoers configuré pour un basculement instantané et silencieux";
+"priv.help.disabled" = "Cliquez pour autoriser pmset sans mot de passe";
+"priv.status.enabled" = "Canal instantané sans mot de passe actif";
+"priv.status.disabled" = "Accès sans mot de passe non configuré";
+"priv.status.detail" = "Accorde NOPASSWD uniquement à /usr/bin/pmset";
+"priv.btn.revoke" = "Révoquer";
+"priv.btn.enable" = "Activer sans mot de passe";
+"system.launch.title" = "Lancer à l'ouverture de session";
+"system.launch.subtitle" = "Reste dans la barre des menus et surveille l'alimentation";
+
+/* Telemetry Card */
+"telemetry.card.title" = "Télémétrie pmset en direct";
+"telemetry.row.sleepdisabled" = "SleepDisabled (Garde globale)";
+"telemetry.val.disabled" = "1 (Veille désactivée)";
+"telemetry.val.enabled" = "0 (Veille autorisée)";
+"telemetry.row.powersource" = "Source d'alimentation";
+"telemetry.row.displaysleep" = "Extinction écran (displaysleep)";
+"telemetry.row.systemsleep" = "Veille système (sleep)";
+"telemetry.row.hibernatemode" = "Mode hibernation (hibernatemode)";
+"telemetry.val.never" = "Jamais";
+"telemetry.val.minutes" = "%@ min";
+"telemetry.val.disabled_zero" = "Désactivé (0)";
+"telemetry.val.mode" = "Mode %@";
+"telemetry.val.on" = "Activé";
+"telemetry.val.off" = "Désactivé";
+
+/* Activity Log Card */
+"log.card.title" = "Activité récente & Journal";
+"log.btn.clear" = "Effacer";
+"log.empty" = "Aucune activité enregistrée";
+
+/* Bottom & Header Actions */
+"action.open_dashboard" = "Console";
+"action.refresh" = "Actualiser";
+"action.sync" = "Synchroniser";
+"action.quit" = "Quitter";
+
+/* Log & Banner Messages */
+"msg.ready.title" = "État système prêt";
+"msg.ready.detail" = "État : %@ · %@";
+"msg.external_change.title" = "Changement externe détecté";
+"msg.external_change.detail" = "État de veille modifié en : %@";
+"msg.toggle.disabled" = "Veille système désactivée (disablesleep 1)";
+"msg.toggle.enabled" = "Veille système autorisée (disablesleep 0)";
+"msg.toggle.source" = "Déclencheur : %@";
+"msg.toggle.failed" = "Basculement de veille incomplet";
+"msg.reason.manual" = "Bascule manuelle";
+"msg.reason.hero_switch" = "Bouton principal";
+"msg.reason.startup_sync" = "Lancement · Synchro secteur auto";
+"msg.reason.startup_battery_recovery" = "Lancement · Retour veille batterie";
+"msg.reason.auto_enabled" = "Automatisation secteur activée";
+"msg.reason.auth_done_sync" = "Accès sans mot de passe · Synchro alimentation";
+"msg.power.ac_connected" = "Secteur branché";
+"msg.power.battery_switched" = "Passé sur batterie";
+"msg.power.clamshell_sleep.title" = "Veille capot fermé déclenchée";
+"msg.power.clamshell_sleep.detail" = "Passage sur batterie capot fermé ; mise en veille immédiate";
+"msg.power.ac_companion_banner" = "⚡️ Secteur branché ! Le chat veille avec élégance sur votre Mac.";
+"msg.power.battery_companion_banner" = "🌙 Sur batterie — Le chat se love pour économiser l'énergie.";
+"msg.auto.turned_on.title" = "Éveil auto sur secteur activé";
+"msg.auto.turned_on.detail" = "Secteur -> disablesleep 1 ; Batterie -> disablesleep 0";
+"msg.auto.turned_off.title" = "Éveil auto sur secteur désactivé";
+"msg.auto.turned_off.detail" = "L'état de veille reste inchangé lors des changements d'alimentation";
+"msg.auth.canceled" = "Autorisation annulée";
+"msg.auth.enabled.banner" = "Accès sans mot de passe activé ! Les bascules s'exécutent en silence.";
+"msg.auth.enabled.title" = "Accès pmset sans mot de passe activé";
+"msg.auth.enabled.detail" = "Configuré dans /etc/sudoers.d/mac_sleep_control";
+"msg.auth.revoked.banner" = "Accès sans mot de passe retiré. Un mot de passe sera requis.";
+"msg.auth.revoked.title" = "Accès sans mot de passe révoqué";
+"msg.auth.revoked.detail" = "Supprimé /etc/sudoers.d/mac_sleep_control";
+"msg.launch.on" = "Lancement à l'ouverture activé";
+"msg.launch.off" = "Lancement à l'ouverture désactivé";
+"msg.launch.detail" = "Géré via macOS SMAppService";
+"msg.launch.error" = "Échec de mise à jour du lancement : %@";
+
+/* Errors */
+"err.passwordless_not_configured" = "L'accès sans mot de passe n'est pas activé. Cliquez sur « Activer sans mot de passe » pour un basculement silencieux.";
+"err.user_canceled" = "Authentification administrateur annulée.";
+"err.invalid_username" = "Le nom d'utilisateur macOS (%@) n'est pas pris en charge.";
+"err.exec_failed" = "La commande privilégiée a échoué (code %d)";
+
+/* Editorial Magazine UI */
+"editorial.issue.awake" = "N° 01 · EN ÉVEIL";
+"editorial.issue.sleep" = "N° 02 · EN VEILLE";
+"editorial.headline.awake" = "TOUJOURS ÉVEILLÉ.";
+"editorial.headline.sleep" = "DOUX SOMMEIL.";
+"editorial.subtitle.awake" = "Éveil Actif · Sous Haute Garde";
+"editorial.subtitle.sleep" = "Mode Repos · Veille Autorisée";
+"editorial.pill.power_wake" = "Éveil Secteur";
+"editorial.pill.power_wake_on" = "Secteur · Actif";
+"editorial.pill.power_wake_off" = "Secteur · Inactif";
+"editorial.pill.tap_sleep" = "Caresser · Veille";
+"editorial.pill.tap_wake" = "Caresser · Éveil";
+"editorial.popover.tap_hint" = "Touchez le chat pour basculer";
+"editorial.popover.power_auto" = "Éveil auto sur secteur";
+"editorial.nerd_console.help" = "Ouvrir la console de diagnostic";

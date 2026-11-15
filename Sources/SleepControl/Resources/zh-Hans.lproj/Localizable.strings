@@ -146,3 +146,20 @@
 "err.user_canceled" = "已取消管理员权限验证。";
 "err.invalid_username" = "当前系统用户名 (%@) 格式不受支持。";
 "err.exec_failed" = "授权命令执行失败 (退出码 %d)";
+
+
+/* Editorial Magazine UI */
+"editorial.issue.awake" = "NO. 01 · KEEP AWAKE";
+"editorial.issue.sleep" = "NO. 02 · RESTING";
+"editorial.headline.awake" = "WIDE AWAKE.";
+"editorial.headline.sleep" = "DEEP SLUMBER.";
+"editorial.subtitle.awake" = "今夜不眠 · 守候中";
+"editorial.subtitle.sleep" = "坠入梦乡 · 允许休眠";
+"editorial.pill.power_wake" = "随电源唤醒";
+"editorial.pill.power_wake_on" = "随电源唤醒 · 开";
+"editorial.pill.power_wake_off" = "随电源唤醒 · 关";
+"editorial.pill.tap_sleep" = "轻触猫咪入眠";
+"editorial.pill.tap_wake" = "轻触猫咪唤醒";
+"editorial.popover.tap_hint" = "轻点猫咪切换状态";
+"editorial.popover.power_auto" = "随电源自动唤醒";
+"editorial.nerd_console.help" = "打开极客诊断面板";

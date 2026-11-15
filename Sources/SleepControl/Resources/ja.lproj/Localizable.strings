@@ -146,3 +146,20 @@
 "err.user_canceled" = "管理者認証がキャンセルされました。";
 "err.invalid_username" = "現在のユーザー名 (%@) の形式はサポートされていません。";
 "err.exec_failed" = "特権コマンドの実行に失敗しました (終了コード %d)";
+
+
+/* Editorial Magazine UI */
+"editorial.issue.awake" = "NO. 01 · KEEP AWAKE";
+"editorial.issue.sleep" = "NO. 02 · RESTING";
+"editorial.headline.awake" = "WIDE AWAKE.";
+"editorial.headline.sleep" = "DEEP SLUMBER.";
+"editorial.subtitle.awake" = "眠らない夜 · 待機中";
+"editorial.subtitle.sleep" = "深い眠り · スリープ許可";
+"editorial.pill.power_wake" = "電源連動で覚醒";
+"editorial.pill.power_wake_on" = "電源連動 · オン";
+"editorial.pill.power_wake_off" = "電源連動 · オフ";
+"editorial.pill.tap_sleep" = "猫に触れて眠る";
+"editorial.pill.tap_wake" = "猫に触れて起こす";
+"editorial.popover.tap_hint" = "猫をタップして切替";
+"editorial.popover.power_auto" = "電源接続時に自動覚醒";
+"editorial.nerd_console.help" = "詳細診断コンソールを開く";

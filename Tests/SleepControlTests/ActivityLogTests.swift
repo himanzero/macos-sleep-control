@@ -10,7 +10,9 @@ struct ActivityLogTests {
         .zhHans,
         .zhHantTW,
         .zhHantHK,
-        .ja
+        .ja,
+        .fr,
+        .es
     ]
 
     // MARK: - R1 & AC: Per-locale Resolution of Activity Log Titles and Details
@@ -320,6 +322,12 @@ struct ActivityLogTests {
             case .zhHantTW, .zhHantHK:
                 #expect(acName == "交流電源 (AC)")
                 #expect(battName == "電池供電")
+            case .fr:
+                #expect(acName == "Secteur")
+                #expect(battName == "Batterie")
+            case .es:
+                #expect(acName == "Corriente CA")
+                #expect(battName == "Batería")
             case .system:
                 break
             }
@@ -340,6 +348,12 @@ struct ActivityLogTests {
             case .ja:
                 #expect(disabledState == "1 (スリープ禁止中)")
                 #expect(enabledState == "0 (通常スリープ許可)")
+            case .fr:
+                #expect(disabledState == "1 (Veille désactivée)")
+                #expect(enabledState == "0 (Veille autorisée)")
+            case .es:
+                #expect(disabledState == "1 (Reposo desactivado)")
+                #expect(enabledState == "0 (Reposo permitido)")
             case .system:
                 break
             }
@@ -363,7 +377,7 @@ struct ActivityLogTests {
 
     // MARK: - R3: Localization Strings Files Integrity
 
-    @Test("Verify all activity log localization keys exist and are non-empty across all 5 .lproj files")
+    @Test("Verify all activity log localization keys exist and are non-empty across all 7 .lproj files")
     func testLocalizationStringsFilesIntegrity() throws {
         let requiredKeys: [String] = [
             "msg.ready.title",
@@ -417,7 +431,7 @@ struct ActivityLogTests {
             "telemetry.val.enabled"
         ]
 
-        let lprojFolders = ["en", "zh-Hans", "zh-Hant-TW", "zh-Hant-HK", "ja"]
+        let lprojFolders = ["en", "zh-Hans", "zh-Hant-TW", "zh-Hant-HK", "ja", "fr", "es"]
 
         for folder in lprojFolders {
             guard let lang = AppLanguage(rawValue: folder),
@@ -553,7 +567,7 @@ struct ActivityLogTests {
 
     @Test("Verify thread-safe language switching and log resolution under concurrent access")
     func testConcurrentLanguageSwitchingStress() async {
-        let testLanguages: [AppLanguage] = [.en, .zhHans, .zhHantTW, .zhHantHK, .ja]
+        let testLanguages: [AppLanguage] = [.en, .zhHans, .zhHantTW, .zhHantHK, .ja, .fr, .es]
         let sampleItem = ActivityLogItem(
             titleKey: "msg.ready.title",
             titleArgs: [],
