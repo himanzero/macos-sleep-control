@@ -3,7 +3,7 @@ import Foundation
 /// Application version resolution utility with dynamic bundle detection and safe tiered fallbacks
 public enum AppVersion {
     /// Baseline fallback version matching the current release cycle
-    public static let fallbackVersion = "2.0.0"
+    public static let fallbackVersion = "2.1.0"
 
     /// Resolves the raw marketing version string (e.g., "1.1.2")
     public static func raw(bundle: Bundle = .main, checkDevBundle: Bool = true) -> String {

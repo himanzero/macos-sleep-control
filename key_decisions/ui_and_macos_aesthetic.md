@@ -48,3 +48,11 @@
   - **Non-Interactive & Window Drag Pass-Through**: Applied `.allowsHitTesting(false)` so clicks and drags pass through to the underlying window background (`window.isMovableByWindowBackground = true`), preventing accidental text selection or drag interruptions.
   - **Multi-Tiered Version Resolution**: Created `AppVersion` service resolving `CFBundleShortVersionString` dynamically from the main bundle, falling back to local dev bundle inspection, and finally to a static release fallback.
   - **Universal i18n Format**: Added `"dashboard.version" = "v%@";` across all 5 supported `.lproj` catalogs.
+
+## Decision 7: Dopamine Micro-Interactions, Tactile Haptics & CLT-Safe Motion State (v2.1.0)
+- **Status**: Accepted
+- **Context**: Following the v2.0.0 Haute Couture Editorial overhaul, static transitions made theme switches, hover interactions, and menu bar panel open/close feel abrupt. At the same time, compiling under macOS Command Line Tools / SwiftPM (`MacOSX27.0.sdk`) fails when `@State` macro expansion requires `SwiftUIMacros`.
+- **Decision Outcome**:
+  - **Semantic Haptic Channels (`HapticEngine`)**: Standardized trackpad Force Touch feedback into `caress()` (0.5s `NSLock`-guarded cooldown), `tap()`, `snap()`, and `toggle()` via `NSHapticFeedbackManager.defaultPerformer`.
+  - **Choreographed Editorial Transitions**: Implemented `CircularIrisShape` (0.42s theme reveal from the click/hover origin), staggered headline/subtitle rolling transitions, cat squash-and-rebound + expanding halo pulse, 3-layer 3D cover parallax (`±2.5°`), zero-press brisk-stroke hover petting (`SpecularSheenOverlay` + ear-perk + `✦` sparkle), `LiquidIndicatorDot` ripple feedback, interruptible `StatusBarPanel` `NSAnimationContext` slide/fade with generation guards, and 28ms-staggered Bento card reveals in `NerdDashboardView`.
+  - **CLT-Safe State Pattern**: Kept all animation and interaction state in `ObservableObject` classes paired with `@StateObject` rather than `@State`, ensuring deterministic compilation under both Xcode and CLT/SwiftPM.

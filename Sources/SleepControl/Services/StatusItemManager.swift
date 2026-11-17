@@ -4,11 +4,16 @@ import Combine
 
 /// Floating frosted-glass status bar panel that automatically clamps to screen boundaries and supports user resizing and dragging
 private final class StatusBarPanel: NSPanel {
+    var isAnimatingTransition: Bool = false
+
     override var canBecomeKey: Bool { true }
     override var canBecomeMain: Bool { false }
 
     /// Guarantees the panel never overflows outside the visible screen bounds
     override func constrainFrameRect(_ frameRect: NSRect, to screen: NSScreen?) -> NSRect {
+        if isAnimatingTransition {
+            return frameRect
+        }
         guard let targetScreen = screen ?? self.screen ?? NSScreen.main else {
             return super.constrainFrameRect(frameRect, to: screen)
         }
@@ -49,6 +54,9 @@ final class StatusItemManager: NSObject, NSWindowDelegate {
     private var panelHostingView: NSHostingView<MenuBarPopoverView>?
     private var outsideClickMonitor: Any?
     private var preferredPanelWidth: CGFloat = 340
+    private var isPanelTargetVisible: Bool = false
+    private var panelAnimationGeneration: UInt64 = 0
+    private var lastAnchoredPanelFrame: NSRect?
     private var mainWindow: NSWindow?
     private var controller: AppController?
     private var cancellables = Set<AnyCancellable>()
@@ -285,8 +293,8 @@ final class StatusItemManager: NSObject, NSWindowDelegate {
     }
 
     @objc private func handleStatusItemClick(_ sender: NSStatusBarButton) {
-        guard let panel = statusPanel else { return }
-        if panel.isVisible {
+        guard statusPanel != nil else { return }
+        if isPanelTargetVisible {
             closePopover()
         } else {
             showStatusPanel(relativeTo: sender)
@@ -320,11 +328,44 @@ final class StatusItemManager: NSObject, NSWindowDelegate {
         originY = max(visibleFrame.minY + safeMargin, min(originY, visibleFrame.maxY - panelHeight - 6.0))
 
         let targetFrame = NSRect(x: originX, y: originY, width: panelWidth, height: panelHeight)
-        panel.setFrame(targetFrame, display: true)
+        let collapsedFrame = NSRect(x: originX, y: originY + 10, width: panelWidth, height: panelHeight)
+        lastAnchoredPanelFrame = targetFrame
+
+        panelAnimationGeneration &+= 1
+        let generation = panelAnimationGeneration
+        isPanelTargetVisible = true
+
+        if !panel.isVisible {
+            panel.alphaValue = 0.0
+            panel.isAnimatingTransition = true
+            panel.setFrame(collapsedFrame, display: false)
+            panel.isAnimatingTransition = false
+        }
 
         NSApp.activate(ignoringOtherApps: true)
         panel.makeKeyAndOrderFront(nil)
         startOutsideClickMonitor()
+
+        panel.isAnimatingTransition = true
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = 0.22
+            context.timingFunction = CAMediaTimingFunction(controlPoints: 0.22, 1.0, 0.36, 1.0)
+            context.allowsImplicitAnimation = true
+            panel.animator().alphaValue = 1.0
+            panel.animator().setFrame(targetFrame, display: true)
+        } completionHandler: { [weak self] in
+            Task { @MainActor in
+                guard let self = self,
+                      let panel = self.statusPanel,
+                      self.panelAnimationGeneration == generation,
+                      self.isPanelTargetVisible else {
+                    return
+                }
+                panel.isAnimatingTransition = false
+                panel.alphaValue = 1.0
+                panel.setFrame(targetFrame, display: true)
+            }
+        }
     }
 
     /// Dynamically updates panel height and screen clamping if content changes while open
@@ -364,9 +405,42 @@ final class StatusItemManager: NSObject, NSWindowDelegate {
         }
     }
 
-    /// Closes the status bar panel programmatically
+    /// Closes the status bar panel programmatically with an interruptible upward retraction
     func closePopover() {
         stopOutsideClickMonitor()
-        statusPanel?.orderOut(nil)
+        guard let panel = statusPanel, isPanelTargetVisible else { return }
+
+        panelAnimationGeneration &+= 1
+        let generation = panelAnimationGeneration
+        isPanelTargetVisible = false
+
+        let anchorFrame = lastAnchoredPanelFrame ?? panel.frame
+        let retractedFrame = NSRect(
+            x: anchorFrame.origin.x,
+            y: anchorFrame.origin.y + 10,
+            width: anchorFrame.width,
+            height: anchorFrame.height
+        )
+
+        panel.isAnimatingTransition = true
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = 0.16
+            context.timingFunction = CAMediaTimingFunction(controlPoints: 0.4, 0.0, 0.2, 1.0)
+            context.allowsImplicitAnimation = true
+            panel.animator().alphaValue = 0.0
+            panel.animator().setFrame(retractedFrame, display: true)
+        } completionHandler: { [weak self] in
+            Task { @MainActor in
+                guard let self = self,
+                      let panel = self.statusPanel,
+                      self.panelAnimationGeneration == generation,
+                      !self.isPanelTargetVisible else {
+                    return
+                }
+                panel.isAnimatingTransition = false
+                panel.orderOut(nil)
+                panel.alphaValue = 1.0
+            }
+        }
     }
 }

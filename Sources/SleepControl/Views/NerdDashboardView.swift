@@ -1,10 +1,15 @@
 import SwiftUI
 import AppKit
 
+private final class NerdDashboardRevealState: ObservableObject {
+    @Published var cardsRevealed: Bool = false
+}
+
 /// Right-side expandable diagnostic & engineering console ("Nerd Drawer") that dynamically
 /// inherits the Editorial Magazine Cover's Awake (Warm Alabaster) or Sleeping (Deep Obsidian) palette.
 struct NerdDashboardView: View {
     @ObservedObject var controller: AppController
+    @StateObject private var revealState = NerdDashboardRevealState()
 
     var body: some View {
         let isAwake = controller.isSleepDisabled
@@ -29,15 +34,19 @@ struct NerdDashboardView: View {
                     VStack(alignment: .leading, spacing: 14) {
                         // 1. Smart Power Automation
                         powerAutomationCard(isAwake: isAwake, fg: fg)
+                            .bentoReveal(revealed: revealState.cardsRevealed, index: 0)
 
                         // 2. Passwordless Authorization & System Settings
                         privilegeAndSystemCard(isAwake: isAwake, fg: fg)
+                            .bentoReveal(revealed: revealState.cardsRevealed, index: 1)
 
                         // 3. Low-level pmset Telemetry
                         telemetryCard(isAwake: isAwake, fg: fg)
+                            .bentoReveal(revealed: revealState.cardsRevealed, index: 2)
 
                         // 4. Real-Time Activity Log Timeline
                         activityLogCard(isAwake: isAwake, fg: fg)
+                            .bentoReveal(revealed: revealState.cardsRevealed, index: 3)
 
                         // 5. Version Footer
                         HStack {
@@ -50,6 +59,7 @@ struct NerdDashboardView: View {
                                 .foregroundStyle(fg.opacity(0.40))
                         }
                         .padding(.top, 2)
+                        .bentoReveal(revealed: revealState.cardsRevealed, index: 4)
                     }
                     .padding(20)
                 }
@@ -57,6 +67,15 @@ struct NerdDashboardView: View {
         }
         .frame(width: 520)
         .animation(.easeInOut(duration: 0.35), value: isAwake)
+        .onAppear {
+            revealState.cardsRevealed = false
+            DispatchQueue.main.async {
+                revealState.cardsRevealed = true
+            }
+        }
+        .onDisappear {
+            revealState.cardsRevealed = false
+        }
     }
 
     // MARK: - Header Bar
@@ -462,5 +481,18 @@ struct NerdDashboardView: View {
                 }
             }
         }
+    }
+}
+
+private extension View {
+    func bentoReveal(revealed: Bool, index: Int) -> some View {
+        self
+            .opacity(revealed ? 1 : 0)
+            .offset(x: revealed ? 0 : 12, y: revealed ? 0 : 6)
+            .animation(
+                .spring(response: 0.34, dampingFraction: 0.82)
+                    .delay(Double(index) * 0.028),
+                value: revealed
+            )
     }
 }

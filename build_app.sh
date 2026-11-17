@@ -8,7 +8,7 @@ APP_BUNDLE="${APP_NAME}.app"
 BUILD_DIR=".build/release"
 
 # Dynamically resolve marketing version from environment, newer git tag, or current release baseline
-DEFAULT_VERSION="2.0.0"
+DEFAULT_VERSION="2.1.0"
 GIT_TAG="$(git describe --tags --abbrev=0 2>/dev/null || true)"
 TAG_VER="${GIT_TAG#v}"
 if [[ -n "${APP_VERSION:-}" ]]; then

@@ -48,7 +48,7 @@ struct AppVersionTests {
 
     @Test("Verify static fallback version constant is valid release format")
     func testStaticFallbackVersionConstant() {
-        #expect(AppVersion.fallbackVersion == "2.0.0")
+        #expect(AppVersion.fallbackVersion == "2.1.0")
     }
 
     // MARK: - AppController Integration Tests
@@ -65,13 +65,13 @@ struct AppVersionTests {
 
     @Test("Verify dashboard.version key resolves correctly across all 7 supported locales")
     func testDashboardVersionLocalizationAcrossAllLocales() {
-        let sampleVersion = "2.0.0"
+        let sampleVersion = "2.1.0"
         for lang in supportedLanguages {
             let localizedPattern = I18n.shared.localized("dashboard.version", in: lang)
             #expect(localizedPattern == "v%@", "Failed for language: \(lang.rawValue)")
 
             let formattedString = LF("dashboard.version", in: lang, sampleVersion)
-            #expect(formattedString == "v2.0.0", "Failed formatting for language: \(lang.rawValue)")
+            #expect(formattedString == "v2.1.0", "Failed formatting for language: \(lang.rawValue)")
 
             let dynamicFormatted = LF("dashboard.version", in: lang, AppVersion.raw())
             #expect(dynamicFormatted == AppVersion.formatted(), "Dynamic formatted mismatch for language: \(lang.rawValue)")

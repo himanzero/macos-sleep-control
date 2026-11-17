@@ -1,10 +1,15 @@
 import SwiftUI
 import AppKit
 
+private final class MenuBarPopoverMotionState: ObservableObject {
+    @Published var catBounceScale: CGFloat = 1.0
+}
+
 /// Compact Haute Couture Editorial popover presented from the macOS menu bar
 struct MenuBarPopoverView: View {
     @ObservedObject var controller: AppController
-    @ObservedObject private var interaction = EditorialInteractionState()
+    @StateObject private var interaction = EditorialInteractionState()
+    @StateObject private var motion = MenuBarPopoverMotionState()
 
     var body: some View {
         let isAwake = controller.isSleepDisabled
@@ -50,6 +55,7 @@ struct MenuBarPopoverView: View {
                         .padding(.top, 14)
 
                     Button {
+                        triggerCatSquashRebound()
                         controller.toggleSleepDisabled()
                     } label: {
                         let assetName = isAwake ? "hero_cat_awake" : "hero_cat_sleeping"
@@ -67,7 +73,7 @@ struct MenuBarPopoverView: View {
                                     .foregroundStyle(fg)
                             }
                         }
-                        .scaleEffect(interaction.isCatHovered ? 1.03 : 1.0)
+                        .scaleEffect((interaction.isCatHovered ? 1.03 : 1.0) * motion.catBounceScale)
                         .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
@@ -141,11 +147,19 @@ struct MenuBarPopoverView: View {
                 // Bottom editorial control bar
                 HStack(spacing: 10) {
                     HStack(spacing: 8) {
-                        Toggle("", isOn: $controller.autoDisableOnAC)
+                        Toggle("", isOn: Binding(
+                            get: { controller.autoDisableOnAC },
+                            set: { newValue in
+                                guard newValue != controller.autoDisableOnAC else { return }
+                                controller.autoDisableOnAC = newValue
+                            }
+                        ))
                             .toggleStyle(.switch)
                             .controlSize(.small)
                             .tint(EditorialTheme.amberAccent)
                             .labelsHidden()
+
+                        LiquidIndicatorDot(isActive: controller.autoDisableOnAC)
 
                         Text(L("editorial.popover.power_auto"))
                             .font(.system(size: 11.5, weight: .medium))
@@ -193,5 +207,16 @@ struct MenuBarPopoverView: View {
         }
         .frame(minWidth: 320, idealWidth: 340, maxWidth: 420)
         .animation(.easeInOut(duration: 0.3), value: isAwake)
+    }
+
+    private func triggerCatSquashRebound() {
+        withAnimation(.spring(response: 0.14, dampingFraction: 0.50)) {
+            motion.catBounceScale = 0.90
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) {
+            withAnimation(.spring(response: 0.34, dampingFraction: 0.58)) {
+                motion.catBounceScale = 1.0
+            }
+        }
     }
 }

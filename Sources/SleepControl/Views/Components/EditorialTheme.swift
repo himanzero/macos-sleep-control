@@ -39,6 +39,14 @@ enum EditorialTheme {
 final class EditorialInteractionState: ObservableObject {
     @Published var isCatHovered: Bool = false
     @Published var isCatPressed: Bool = false
+    /// Normalized cursor parallax offset (-1...1)
+    @Published var parallaxPoint: CGPoint = .zero
+    /// Normalized origin for circular iris theme transitions
+    @Published var irisOrigin: UnitPoint = .center
+    /// Progress (0...1) for circular iris theme transitions
+    @Published var irisProgress: CGFloat = 1.0
+    /// Incrementing trigger for ambient halo pulse effects
+    @Published var haloPulseTrigger: Int = 0
 }
 
 /// Editorial hairline-bordered card container matching the main cover's Awake/Sleeping palette
@@ -156,7 +164,98 @@ struct EditorialLanguagePill: View {
                 )
         }
         .menuStyle(.borderlessButton)
+        .environment(\.colorScheme, isAwake ? .light : .dark)
         .fixedSize()
         .help(L("lang.menu.title"))
+    }
+}
+
+/// Animatable circular iris reveal shape expanding from an arbitrary normalized origin to cover the full bounds
+struct CircularIrisShape: Shape {
+    var progress: CGFloat
+    var origin: UnitPoint = .center
+
+    var animatableData: CGFloat {
+        get { progress }
+        set { progress = newValue }
+    }
+
+    func path(in rect: CGRect) -> Path {
+        let clamped = max(0, min(1, progress))
+        let center = CGPoint(
+            x: rect.minX + rect.width * origin.x,
+            y: rect.minY + rect.height * origin.y
+        )
+        let corners = [
+            CGPoint(x: rect.minX, y: rect.minY),
+            CGPoint(x: rect.maxX, y: rect.minY),
+            CGPoint(x: rect.minX, y: rect.maxY),
+            CGPoint(x: rect.maxX, y: rect.maxY)
+        ]
+        let maxRadius = corners.reduce(CGFloat(0)) { currentMax, corner in
+            max(currentMax, hypot(corner.x - center.x, corner.y - center.y))
+        }
+        let radius = maxRadius * clamped
+
+        var path = Path()
+        path.addEllipse(in: CGRect(
+            x: center.x - radius,
+            y: center.y - radius,
+            width: radius * 2,
+            height: radius * 2
+        ))
+        return path
+    }
+}
+
+private final class LiquidIndicatorDotState: ObservableObject {
+    @Published var rippleScale: CGFloat = 1.0
+    @Published var rippleOpacity: Double = 0.0
+}
+
+/// Liquid-like status indicator dot with spring pop-in and subtle expanding ripple halo when activated
+struct LiquidIndicatorDot: View {
+    let isActive: Bool
+    var color: Color = EditorialTheme.amberAccent
+    var size: CGFloat = 6
+    var pulseTrigger: Int = 0
+
+    @StateObject private var state = LiquidIndicatorDotState()
+
+    var body: some View {
+        ZStack {
+            Circle()
+                .stroke(color.opacity(state.rippleOpacity), lineWidth: 1.2)
+                .frame(width: size, height: size)
+                .scaleEffect(state.rippleScale)
+                .allowsHitTesting(false)
+
+            Circle()
+                .fill(color)
+                .frame(width: size, height: size)
+                .scaleEffect(isActive ? 1.0 : 0.2)
+                .opacity(isActive ? 1.0 : 0.0)
+                .animation(.spring(response: 0.34, dampingFraction: 0.56), value: isActive)
+        }
+        .frame(width: size, height: size)
+        .onChange(of: isActive) { _, newValue in
+            if newValue {
+                triggerRipple()
+            }
+        }
+        .onChange(of: pulseTrigger) { _, _ in
+            if isActive {
+                triggerRipple()
+            }
+        }
+    }
+
+    private func triggerRipple() {
+        state.rippleScale = 1.0
+        state.rippleOpacity = 0.7
+        withAnimation(.easeOut(duration: 0.65)) {
+            state.rippleScale = 2.8
+            state.rippleOpacity = 0.0
+        }
     }
 }
